@@ -1,7 +1,14 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.exceptions import HTTPException, RequestValidationError
+from sqlalchemy.exc import SQLAlchemyError
 from app.config.settings import settings
 from app.api import auth, transactions, statistics, budgets, accounts
+from app.core.exceptions import (
+    custom_exception_handler, http_exception_handler,
+    validation_exception_handler, database_exception_handler,
+    general_exception_handler, CustomException
+)
 
 app = FastAPI(
     title="个人财务记账系统 API",
@@ -12,11 +19,18 @@ app = FastAPI(
 # CORS中间件配置
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=settings.allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# 注册异常处理器
+app.add_exception_handler(CustomException, custom_exception_handler)
+app.add_exception_handler(HTTPException, http_exception_handler)
+app.add_exception_handler(RequestValidationError, validation_exception_handler)
+app.add_exception_handler(SQLAlchemyError, database_exception_handler)
+app.add_exception_handler(Exception, general_exception_handler)
 
 # 注册路由
 app.include_router(auth.router, prefix="/api/auth", tags=["认证"])
