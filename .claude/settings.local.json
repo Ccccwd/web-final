@@ -3,7 +3,13 @@
     "allow": [
       "Bash(uv sync:*)",
       "Bash(curl:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(source:*)",
+      "Bash(pip install:*)",
+      "Bash(where:*)",
+      "Bash(.venvScriptsactivate)",
+      "Bash(\".venv\\Scripts\\activate\")",
+      "Bash(.venv/Scripts/python.exe:*)"
     ],
     "deny": [],
     "ask": []

@@ -140,3 +140,116 @@ class AuthService:
             refresh_token=new_refresh_token,
             token_type="bearer"
         )
+
+    async def request_password_reset(self, email: str) -> str:
+        """请求密码重置"""
+        user = self.get_user_by_email(email)
+        if not user:
+            # 为了安全，即使用户不存在也返回成功
+            return "如果该邮箱存在，重置链接已发送"
+
+        # 生成重置令牌
+        from app.utils.security import generate_password_reset_token
+        reset_token = generate_password_reset_token(email)
+
+        # 这里应该发送邮件，暂时只返回令牌（实际应用中应该通过邮件发送）
+        # TODO: 集成邮件服务
+        print(f"密码重置令牌: {reset_token}")  # 临时用于调试
+
+        return "如果该邮箱存在，重置链接已发送"
+
+    async def reset_password(self, token: str, new_password: str) -> bool:
+        """重置密码"""
+        from app.utils.jwt_utils import verify_token
+
+        try:
+            payload = verify_token(token)
+            if payload is None or payload.get("type") != "password_reset":
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="无效的重置令牌"
+                )
+
+            email = payload.get("sub")
+            user = self.get_user_by_email(email)
+            if not user:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="用户不存在"
+                )
+
+            # 更新密码
+            user.password = get_password_hash(new_password)
+            self.db.commit()
+
+            return True
+
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="重置密码失败"
+            )
+
+    async def get_user_profile(self, user_id: int) -> UserResponse:
+        """获取用户信息"""
+        user = self.db.query(User).filter(User.id == user_id).first()
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="用户不存在"
+            )
+
+        return UserResponse(
+            id=user.id,
+            username=user.username,
+            email=user.email,
+            phone=user.phone,
+            avatar=user.avatar,
+            is_active=user.is_active,
+            created_at=user.created_at
+        )
+
+    async def update_user_profile(self, user_id: int, user_update: dict) -> UserResponse:
+        """更新用户信息"""
+        user = self.db.query(User).filter(User.id == user_id).first()
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="用户不存在"
+            )
+
+        # 检查用户名是否被其他用户使用
+        if "username" in user_update and user_update["username"] != user.username:
+            existing_user = self.get_user_by_username(user_update["username"])
+            if existing_user:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="用户名已存在"
+                )
+
+        # 检查邮箱是否被其他用户使用
+        if "email" in user_update and user_update["email"] != user.email:
+            existing_user = self.get_user_by_email(user_update["email"])
+            if existing_user:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="邮箱已存在"
+                )
+
+        # 更新用户信息
+        for key, value in user_update.items():
+            if hasattr(user, key) and value is not None:
+                setattr(user, key, value)
+
+        self.db.commit()
+        self.db.refresh(user)
+
+        return UserResponse(
+            id=user.id,
+            username=user.username,
+            email=user.email,
+            phone=user.phone,
+            avatar=user.avatar,
+            is_active=user.is_active,
+            created_at=user.created_at
+        )

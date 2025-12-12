@@ -142,7 +142,7 @@ export const useUserStore = defineStore('user', () => {
     try {
       isLoading.value = true
 
-      const response = await http.put<User>('/auth/profile', userData)
+      const response = await http.put<User>('/auth/me', userData)
 
       if (response.success && response.data) {
         user.value = response.data
@@ -166,17 +166,9 @@ export const useUserStore = defineStore('user', () => {
     try {
       isLoading.value = true
 
-      const response = await http.post('/auth/change-password', {
-        old_password: oldPassword,
-        new_password: newPassword
-      })
-
-      if (response.success) {
-        ElMessage.success('密码修改成功')
-        return true
-      } else {
-        throw new Error(response.message || '密码修改失败')
-      }
+      // 由于后端还没有实现修改密码接口，暂时提示
+      ElMessage.info('修改密码功能暂未开放，请使用忘记密码功能')
+      return false
     } catch (error: any) {
       const errorMessage = error.message || '密码修改失败'
       ElMessage.error(errorMessage)
@@ -191,7 +183,7 @@ export const useUserStore = defineStore('user', () => {
     try {
       isLoading.value = true
 
-      const response = await http.post('/auth/reset-password', { email })
+      const response = await http.post('/auth/password-reset-request', { email })
 
       if (response.success) {
         ElMessage.success('重置密码邮件已发送')
