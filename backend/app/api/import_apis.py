@@ -205,7 +205,7 @@ async def download_error_details(
             raise HTTPException(status_code=404, detail="无错误详情")
 
         # 生成CSV格式的错误详情
-        csv_content = self._generate_error_csv(import_log.error_details)
+        csv_content = _generate_error_csv(import_log.error_details)
 
         # 创建文件流
         def iterfile():
@@ -304,7 +304,7 @@ async def validate_import_file(
     except Exception as e:
         return error_response(500, f"验证失败: {str(e)}")
 
-def _generate_error_csv(self, error_details: List[dict]) -> str:
+def _generate_error_csv(error_details: List[dict]) -> str:
     """生成错误详情CSV"""
     if not error_details:
         return ""

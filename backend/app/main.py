@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import HTTPException, RequestValidationError
 from sqlalchemy.exc import SQLAlchemyError
 from app.config.settings import settings
-from app.api import auth, transactions, statistics, budgets, accounts, categories, import as import_api
+from app.api import auth, transactions, statistics, budgets, accounts, categories, import_apis as import_api
 from app.core.exceptions import (
     custom_exception_handler, http_exception_handler,
     validation_exception_handler, database_exception_handler,

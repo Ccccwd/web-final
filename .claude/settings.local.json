@@ -9,7 +9,8 @@
       "Bash(where:*)",
       "Bash(.venvScriptsactivate)",
       "Bash(\".venv\\Scripts\\activate\")",
-      "Bash(.venv/Scripts/python.exe:*)"
+      "Bash(.venv/Scripts/python.exe:*)",
+      "Bash(python -m py_compile:*)"
     ],
     "deny": [],
     "ask": []

@@ -6,7 +6,7 @@ from typing import List, Dict, Any, Tuple, Optional
 from decimal import Decimal, InvalidOperation
 import chardet
 
-from app.models.transaction import TransactionType, TransactionSource
+from app.models.transaction import TransactionType
 from app.schemas.import_log import ImportPreview, ImportErrorDetail
 
 class WeChatBillService:
@@ -141,7 +141,7 @@ class WeChatBillService:
             }
 
             return encoding_map.get(encoding, encoding or 'utf-8')
-        except:
+        except Exception:
             return 'utf-8'
 
     def _find_header_row(self, rows: List[List[str]]) -> int:
@@ -376,7 +376,7 @@ class WeChatBillService:
                         transaction_types[original_type]["count"] += 1
                         transaction_types[original_type]["amount"] += amount
 
-                except:
+                except Exception:
                     continue
 
             return {
@@ -403,7 +403,7 @@ class WeChatBillService:
                 transaction_data = self._parse_transaction_row(headers, row)
                 if transaction_data and transaction_data['transaction_time']:
                     dates.append(transaction_data['transaction_time'])
-            except:
+            except Exception:
                 continue
 
         if not dates:
