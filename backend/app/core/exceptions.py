@@ -28,6 +28,11 @@ class AuthorizationError(CustomException):
     def __init__(self, message: str = "权限不足", data=None):
         super().__init__(403, message, data)
 
+class ValidationError(CustomException):
+    """验证异常"""
+    def __init__(self, message: str = "参数验证失败", data=None):
+        super().__init__(400, message, data)
+
 class NotFoundError(CustomException):
     """资源不存在异常"""
     def __init__(self, message: str = "资源不存在", data=None):

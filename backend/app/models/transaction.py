@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, Enum, Numeric, ForeignKey, JSON, Text
+from sqlalchemy import Column, Integer, String, DateTime, Enum, Numeric, ForeignKey, JSON, Text, Boolean
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.config.database import Base
@@ -8,6 +8,11 @@ class TransactionType(str, enum.Enum):
     INCOME = "income"
     EXPENSE = "expense"
     TRANSFER = "transfer"
+
+class TransactionSource(str, enum.Enum):
+    MANUAL = "manual"  # 手动输入
+    WECHAT = "wechat"  # 微信导入
+    IMPORT = "import"  # 其他导入
 
 class Transaction(Base):
     __tablename__ = "transactions"
@@ -24,6 +29,15 @@ class Transaction(Base):
     images = Column(JSON, comment="图片URL数组")
     tags = Column(String(200), comment="标签(逗号分隔)")
     location = Column(String(100), comment="地点")
+
+    # 微信导入相关字段
+    source = Column(Enum(TransactionSource), default=TransactionSource.MANUAL, comment="数据来源")
+    wechat_transaction_id = Column(String(100), unique=True, comment="微信交易ID(防止重复导入)")
+    original_category = Column(String(100), comment="原始分类(如微信分类)")
+    merchant_name = Column(String(200), comment="商户名称")
+    pay_method = Column(String(50), comment="支付方式")
+    is_repeated = Column(Boolean, default=False, comment="是否重复交易")
+
     created_at = Column(DateTime(timezone=True), server_default=func.now(), comment="创建时间")
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), comment="更新时间")
 
