@@ -10,7 +10,9 @@
       "Bash(.venvScriptsactivate)",
       "Bash(\".venv\\Scripts\\activate\")",
       "Bash(.venv/Scripts/python.exe:*)",
-      "Bash(python -m py_compile:*)"
+      "Bash(python -m py_compile:*)",
+      "Bash(npm run type-check)",
+      "Bash(npm run)"
     ],
     "deny": [],
     "ask": []

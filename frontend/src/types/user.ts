@@ -5,6 +5,7 @@ export interface User {
   phone?: string
   avatar?: string
   is_active: boolean
+  role?: string
   created_at: string
   updated_at?: string
 }
@@ -19,6 +20,19 @@ export interface UserCreate {
 export interface UserLogin {
   username: string
   password: string
+}
+
+export interface LoginData {
+  username: string
+  password: string
+}
+
+export interface RegisterData {
+  username: string
+  email: string
+  password: string
+  confirm_password?: string
+  phone?: string
 }
 
 export interface UserUpdate {

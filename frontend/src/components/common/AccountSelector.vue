@@ -95,7 +95,7 @@ const filteredAccounts = computed(() => {
 
   // 按启用状态过滤
   if (!props.includeDisabled) {
-    accounts = accounts.filter(a => a.is_enabled)
+    accounts = accounts.filter(a => a.is_active)
   }
 
   // 按账户类型过滤

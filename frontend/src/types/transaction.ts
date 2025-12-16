@@ -37,7 +37,7 @@ export interface Account {
   icon?: string
   color?: string
   is_default: boolean
-  is_enabled: boolean
+  is_active: boolean
   description?: string
   created_at: string
 }

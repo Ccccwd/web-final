@@ -138,7 +138,7 @@
           <div v-if="previewData.preview.potential_duplicates > 0" class="warning-section">
             <el-alert
               title="检测到重复交易"
-              :description="`发现 ${previewData.preview.potential_duplicates} 条潜在重复交易，建议在导入设置中选择"跳过重复记录"`"
+              :description="`发现 ${previewData.preview.potential_duplicates} 条潜在重复交易，建议在导入设置中选择'跳过重复记录'`"
               type="warning"
               show-icon
               :closable="false"

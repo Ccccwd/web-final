@@ -1,7 +1,7 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios'
 import { ElMessage, ElLoading } from 'element-plus'
 import { APIResponse } from '@/types'
-import { useUserStore } from '@/store/modules/user'
+import { useUserStore } from '@/stores/user'
 
 // 声明接口用于扩展axios配置
 interface CustomAxiosRequestConfig extends AxiosRequestConfig {

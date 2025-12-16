@@ -235,7 +235,7 @@ const { trendData, categoryStats } = statisticsStore
 
 // 趋势图数据
 const trendChartData = computed(() => {
-  return trendData.value.map(item => ({
+  return trendData.map(item => ({
     date: item.date,
     income: item.income,
     expense: item.expense,
@@ -245,8 +245,8 @@ const trendChartData = computed(() => {
 
 // 分类饼图数据
 const categoryPieData = computed(() => {
-  if (!categoryStats.value?.categories) return []
-  return categoryStats.value.categories.map(item => ({
+  if (!categoryStats?.categories) return []
+  return categoryStats.categories.map(item => ({
     name: item.name,
     value: item.amount,
     color: item.color,
@@ -256,8 +256,8 @@ const categoryPieData = computed(() => {
 
 // 分类柱状图数据
 const categoryBarData = computed(() => {
-  if (!categoryStats.value?.categories) return []
-  return categoryStats.value.categories.map(item => ({
+  if (!categoryStats?.categories) return []
+  return categoryStats.categories.map(item => ({
     name: item.name,
     value: item.amount,
     color: item.color
@@ -266,8 +266,8 @@ const categoryBarData = computed(() => {
 
 // 分类表格数据
 const categoryTableData = computed(() => {
-  if (!categoryStats.value?.categories) return []
-  return categoryStats.value.categories.map(item => ({
+  if (!categoryStats?.categories) return []
+  return categoryStats.categories.map(item => ({
     ...item,
     average: item.amount / item.count
   }))
@@ -342,7 +342,7 @@ const exportData = async () => {
     exporting.value = true
 
     const params = {
-      transaction_type: statisticsType.value === 'category' ? categoryType.value : 'all',
+      transaction_type: (statisticsType.value === 'category' ? categoryType.value : 'all') as 'income' | 'expense' | 'all',
       start_date: dateRange.value.start || new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().slice(0, 10),
       end_date: dateRange.value.end || new Date().toISOString().slice(0, 10)
     }
