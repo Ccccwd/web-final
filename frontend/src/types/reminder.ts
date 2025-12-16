@@ -59,7 +59,7 @@ export interface ReminderNotification {
   is_read: boolean
 }
 
-export interface BudgetAlert {
+export interface BudgetNotification {
   reminder_id: number
   category_name?: string
   budget_amount: number

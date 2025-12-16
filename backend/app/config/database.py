@@ -40,12 +40,14 @@ def get_db():
 
 def create_tables():
     """创建所有表"""
-    from app.models import *  # 导入所有模型
+    # 导入所有模型以确保它们被注册
+    from app.models import user, category, transaction, account, budget, reminder, statistics
     Base.metadata.create_all(bind=engine)
 
 def drop_tables():
     """删除所有表（仅用于测试）"""
-    from app.models import *  # 导入所有模型
+    # 导入所有模型以确保它们被注册
+    from app.models import user, category, transaction, account, budget, reminder, statistics
     Base.metadata.drop_all(bind=engine)
 
 def init_database():
@@ -63,7 +65,7 @@ def insert_default_data():
     db = SessionLocal()
     try:
         # 检查是否已有数据
-        existing_count = db.query(Category).filter(Category.is_system == True).count()
+        existing_count = db.query(Category).filter(Category.is_system.is_(True)).count()
         if existing_count > 0:
             return
 

@@ -124,3 +124,6 @@ export interface BarChartConfig extends ChartBaseConfig {
     }
   }
 }
+
+// ECharts 配置类型
+export type ECOption = any

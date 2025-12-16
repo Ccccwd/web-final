@@ -1,5 +1,6 @@
 from pydantic_settings import BaseSettings
 from typing import Optional
+import os
 
 class Settings(BaseSettings):
     # 应用配置
@@ -19,6 +20,9 @@ class Settings(BaseSettings):
 
     # CORS配置
     allowed_origins: list = ["http://localhost:3000"]
+
+    # 文件导出配置
+    export_path: str = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "exports")
 
     class Config:
         env_file = ".env"
