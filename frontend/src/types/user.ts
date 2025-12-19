@@ -10,6 +10,11 @@ export interface User {
   updated_at?: string
 }
 
+// API响应类型
+export interface UserResponse {
+  data: User
+}
+
 export interface UserCreate {
   username: string
   email: string

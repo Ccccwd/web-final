@@ -15,7 +15,8 @@
       "Bash(npm run)",
       "Bash(cat:*)",
       "Bash(python:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(timeout 60 npm run build:*)"
     ],
     "deny": [],
     "ask": []

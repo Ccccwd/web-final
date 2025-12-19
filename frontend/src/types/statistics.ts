@@ -1,5 +1,14 @@
 import { TransactionType, Category } from './transaction'
 
+// API响应类型
+export interface OverviewResponse {
+  data: OverviewData
+}
+
+export interface CategoryStatisticsResponse {
+  data: CategoryStatistics
+}
+
 export interface OverviewData {
   monthly_summary: {
     income: number

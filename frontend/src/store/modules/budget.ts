@@ -316,7 +316,7 @@ export const useBudgetStore = defineStore('budget', () => {
   // 检查预算冲突
   const checkBudgetConflict = async (budgetData: BudgetCreate, excludeId?: number): Promise<boolean> => {
     try {
-      const queryParams = { ...budgetData, exclude_id }
+      const queryParams = { ...budgetData, exclude_id: excludeId }
 
       const response = await http.get<boolean>('/budgets/check-conflict', {
         params: queryParams

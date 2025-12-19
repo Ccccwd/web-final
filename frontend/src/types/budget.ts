@@ -1,5 +1,6 @@
 export interface Budget {
   id: number
+  category_id?: number
   category?: {
     id: number
     name: string
@@ -48,6 +49,7 @@ export interface BudgetAlert {
   actual_spending: number
   percentage: number
   status: 'warning' | 'exceeded'
+  alert_level: 'warning' | 'exceeded' | 'danger'
   remaining: number
   alert_threshold: number
   period_type: 'monthly' | 'yearly'
@@ -105,4 +107,9 @@ export interface BudgetUsage {
   period_type: 'monthly' | 'yearly'
 }
 
-export type PeriodType = 'monthly' | 'yearly'
+export enum PeriodType {
+  MONTHLY = 'monthly',
+  YEARLY = 'yearly'
+}
+
+export type PeriodTypeType = 'monthly' | 'yearly'

@@ -320,7 +320,7 @@ import { ElMessage } from 'element-plus'
 import {
   UploadFilled, Document, Loading
 } from '@element-plus/icons-vue'
-import { importAPI, accountApi } from '@/api'
+import { accountApi } from '@/api'
 
 const props = defineProps<{
   modelValue: boolean
@@ -384,7 +384,7 @@ const canNextStep = computed(() => {
 const loadAccounts = async () => {
   try {
     const response = await accountApi.getAccounts()
-    accounts.value = response.accounts || []
+    accounts.value = (response as any).data?.accounts || []
 
     // 设置默认账户
     const defaultAccount = accounts.value.find(acc => acc.is_default)
@@ -484,20 +484,23 @@ const previewFile = async () => {
   previewError.value = ''
 
   try {
-    const response = await importAPI.previewWechatBill({
-      file: new File([fileContent.value], selectedFile.value!.name, { type: 'text/csv' })
-    })
+    // 暂时禁用导入功能
+    previewError.value = '微信导入功能暂未实现，敬请期待'
 
-    if (response.valid) {
-      previewData.value = response
-      summaryData.value = response.summary || {}
-    } else {
-      previewError.value = response.error || '文件格式验证失败'
-    }
+    // const response = await importAPI.previewWechatBill({
+    //   file: new File([fileContent.value], selectedFile.value!.name, { type: 'text/csv' })
+    // })
+
+    // if (response.valid) {
+    //   previewData.value = response
+    //   summaryData.value = response.summary || {}
+    // } else {
+    //   previewError.value = response.error || '文件格式验证失败'
+    // }
 
   } catch (error: any) {
     console.error('预览失败:', error)
-    previewError.value = error.response?.data?.message || '预览失败'
+    previewError.value = '预览功能暂未实现'
   } finally {
     previewLoading.value = false
   }
@@ -523,34 +526,30 @@ const startImport = async () => {
       }
     }, 500)
 
-    const response = await importAPI.importWechatBill({
-      file: new File([fileContent.value], selectedFile.value.name, { type: 'text/csv' }),
-      skip_duplicates: importSettings.skip_duplicates,
-      auto_categorize: importSettings.auto_categorize,
-      default_account_id: importSettings.default_account_id
-    })
+    // 暂时禁用导入功能
+    // const response = await importAPI.importWechatBill({
+    //   file: new File([fileContent.value], selectedFile.value.name, { type: 'text/csv' }),
+    //   skip_duplicates: importSettings.skip_duplicates,
+    //   auto_categorize: importSettings.auto_categorize,
+    //   default_account_id: importSettings.default_account_id
+    // })
 
     clearInterval(progressInterval)
 
     importProgress.percentage = 100
     importProgress.message = '导入完成！'
 
-    // 处理导入结果
+    // 暂时禁用导入结果处理
     importResult.value = {
-      status: response.failed_records === 0 ? 'success' : 'partial',
-      total_records: response.total_records,
-      success_count: response.success_records,
-      error_count: response.failed_records,
-      import_log_id: response.import_log_id
+      status: 'pending',
+      total_records: 0,
+      success_count: 0,
+      error_count: 0,
+      import_log_id: null
     }
 
     currentStep.value = 3
-
-    if (response.failed_records === 0) {
-      ElMessage.success('账单导入成功！')
-    } else {
-      ElMessage.warning(`账单部分导入成功，${response.failed_records} 条记录导入失败`)
-    }
+    ElMessage.info('导入功能暂未实现，敬请期待')
 
     emit('success')
 

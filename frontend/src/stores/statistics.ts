@@ -4,7 +4,9 @@ import { getOverview, getTrend, getCategoryStatistics } from '@/api/statistics'
 import type {
   OverviewData,
   TrendData,
-  CategoryStatistics
+  CategoryStatistics,
+  OverviewResponse,
+  CategoryStatisticsResponse
 } from '@/types/statistics'
 
 export const useStatisticsStore = defineStore('statistics', () => {
