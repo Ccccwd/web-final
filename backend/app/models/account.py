@@ -34,6 +34,7 @@ class Account(Base):
     user = relationship("User", back_populates="accounts")
     transactions_from = relationship("Transaction", foreign_keys="Transaction.account_id", back_populates="account")
     transactions_to = relationship("Transaction", foreign_keys="Transaction.to_account_id", back_populates="to_account")
+    balance_history = relationship("AccountBalanceHistory", back_populates="account", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<Account(id={self.id}, name='{self.name}', type='{self.type}', balance={self.balance})>"

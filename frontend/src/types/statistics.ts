@@ -115,7 +115,8 @@ export interface PieChartData extends ChartData {
   }[]
 }
 
-export interface LineChartData extends ChartData {
+export interface LineChartData {
+  labels: string[]
   datasets: {
     label: string
     data: number[]

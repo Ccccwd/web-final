@@ -75,3 +75,34 @@ export interface UpdateBudgetData {
   alert_threshold?: number
   is_enabled?: boolean
 }
+
+// 添加缺失的类型
+export interface BudgetCreate {
+  category_id: number
+  amount: number
+  period_type: 'monthly' | 'yearly'
+  year: number
+  month?: number
+  alert_threshold?: number
+  is_enabled?: boolean
+}
+
+export interface BudgetUpdate {
+  amount?: number
+  alert_threshold?: number
+  is_enabled?: boolean
+}
+
+export interface BudgetUsage {
+  category_id: number
+  category_name: string
+  budget_amount: number
+  actual_spending: number
+  percentage: number
+  status: 'normal' | 'warning' | 'exceeded'
+  remaining: number
+  alert_threshold: number
+  period_type: 'monthly' | 'yearly'
+}
+
+export type PeriodType = 'monthly' | 'yearly'

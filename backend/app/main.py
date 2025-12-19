@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import HTTPException, RequestValidationError
 from sqlalchemy.exc import SQLAlchemyError
 from app.config.settings import settings
-from app.api import auth, transactions, statistics, budgets, accounts, categories, import_apis as import_api
+from app.api import auth, transactions, statistics, budgets, accounts, categories, import_apis as import_api, account_balance_history, reminders, reports
 from app.core.exceptions import (
     custom_exception_handler, http_exception_handler,
     validation_exception_handler, database_exception_handler,
@@ -40,6 +40,9 @@ app.include_router(transactions.router, prefix="/api/transactions", tags=["交�
 app.include_router(import_api.router, prefix="/api/import", tags=["账单导入"])
 app.include_router(statistics.router, prefix="/api/statistics", tags=["统计分析"])
 app.include_router(budgets.router, prefix="/api/budgets", tags=["预算管理"])
+app.include_router(account_balance_history.router, prefix="/api", tags=["账户余额历史"])
+app.include_router(reminders.router, prefix="/api/reminders", tags=["智能提醒"])
+app.include_router(reports.router, prefix="/api/reports", tags=["分析报告"])
 
 @app.get("/")
 async def root():

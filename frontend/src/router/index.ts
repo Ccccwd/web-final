@@ -119,11 +119,11 @@ router.beforeEach(async (to, from, next) => {
   }
 
   // 显示加载状态
-  const loading = ElMessage.loading({
-    message: '加载中...',
-    duration: 0,
-    customClass: 'route-loading'
-  })
+  const loading = document.createElement('div')
+  loading.className = 'route-loading'
+  loading.innerHTML = '加载中...'
+  loading.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;padding:20px;background:rgba(0,0,0,0.8);color:white;border-radius:8px;'
+  document.body.appendChild(loading)
 
   try {
     // 检查是否需要认证
@@ -170,7 +170,9 @@ router.beforeEach(async (to, from, next) => {
     }
   } finally {
     // 关闭加载状态
-    loading.close()
+    if (loading.parentNode) {
+      loading.parentNode.removeChild(loading)
+    }
   }
 })
 

@@ -6,6 +6,7 @@ from .budget import Budget, PeriodType
 from .reminder import Reminder, ReminderType
 from .statistics_cache import StatisticsCache
 from .import_log import ImportLog, ImportStatus
+from .account_balance_history import AccountBalanceHistory, BalanceChangeType
 
 __all__ = [
     "User",
@@ -15,5 +16,6 @@ __all__ = [
     "Budget", "PeriodType",
     "Reminder", "ReminderType",
     "StatisticsCache",
-    "ImportLog", "ImportStatus"
+    "ImportLog", "ImportStatus",
+    "AccountBalanceHistory", "BalanceChangeType"
 ]

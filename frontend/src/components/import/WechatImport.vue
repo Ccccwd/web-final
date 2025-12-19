@@ -320,7 +320,7 @@ import { ElMessage } from 'element-plus'
 import {
   UploadFilled, Document, Loading
 } from '@element-plus/icons-vue'
-import { importAPI, accountAPI } from '@/api'
+import { importAPI, accountApi } from '@/api'
 
 const props = defineProps<{
   modelValue: boolean
@@ -383,7 +383,7 @@ const canNextStep = computed(() => {
 // 方法
 const loadAccounts = async () => {
   try {
-    const response = await accountAPI.getAccounts()
+    const response = await accountApi.getAccounts()
     accounts.value = response.accounts || []
 
     // 设置默认账户

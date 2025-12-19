@@ -12,7 +12,10 @@
       "Bash(.venv/Scripts/python.exe:*)",
       "Bash(python -m py_compile:*)",
       "Bash(npm run type-check)",
-      "Bash(npm run)"
+      "Bash(npm run)",
+      "Bash(cat:*)",
+      "Bash(python:*)",
+      "Bash(npm run build:*)"
     ],
     "deny": [],
     "ask": []

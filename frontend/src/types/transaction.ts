@@ -37,9 +37,10 @@ export interface Account {
   icon?: string
   color?: string
   is_default: boolean
-  is_active: boolean
+  is_enabled: boolean
   description?: string
   created_at: string
+  updated_at?: string
 }
 
 export interface Transaction {

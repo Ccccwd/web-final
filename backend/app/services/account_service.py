@@ -7,6 +7,7 @@ from app.models.account import Account, AccountType
 from app.models.transaction import Transaction, TransactionType, TransactionSource
 from app.schemas.account import AccountCreate, AccountUpdate, AccountTransfer, AccountWithStats
 from app.core.exceptions import ValidationError, NotFoundError
+from app.services.account_balance_history_service import AccountBalanceHistoryService
 
 class AccountService:
     def __init__(self, db: Session):
@@ -49,6 +50,15 @@ class AccountService:
         self.db.add(account)
         self.db.commit()
         self.db.refresh(account)
+
+        # 记录初始余额历史
+        if float(account.balance) > 0:
+            balance_service = AccountBalanceHistoryService(self.db)
+            try:
+                balance_service.record_initial_balance(account.id)
+            except Exception:
+                # 如果记录历史失败，不影响账户创建
+                pass
 
         return account
 
@@ -299,6 +309,20 @@ class AccountService:
         self.db.refresh(to_transaction)
         self.db.refresh(from_account)
         self.db.refresh(to_account)
+
+        # 记录余额变化历史
+        balance_service = AccountBalanceHistoryService(self.db)
+        try:
+            # 记录转出和转入的余额变化
+            balance_service.record_transfer_changes(
+                from_account_id=transfer_data.from_account_id,
+                to_account_id=transfer_data.to_account_id,
+                amount=transfer_data.amount,
+                transaction_id=from_transaction.id
+            )
+        except Exception:
+            # 如果记录历史失败，不影响转账
+            pass
 
         return from_transaction, to_transaction, from_account, to_account
 

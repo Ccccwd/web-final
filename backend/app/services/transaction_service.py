@@ -12,6 +12,7 @@ from app.schemas.transaction import (
     TransactionSummary
 )
 from app.core.exceptions import ValidationError, NotFoundError
+from app.services.account_balance_history_service import AccountBalanceHistoryService
 
 class TransactionService:
     def __init__(self, db: Session):
@@ -69,12 +70,24 @@ class TransactionService:
             **transaction_data.model_dump(exclude_unset=True)
         )
 
+        # 更新账户余额
+        if transaction_data.type == TransactionType.INCOME:
+            account.balance += transaction_data.amount
+        elif transaction_data.type == TransactionType.EXPENSE:
+            account.balance -= transaction_data.amount
+        # 转账类型的余额变化在专门的转账方法中处理
+
         self.db.add(transaction)
-
-        # 更新账户余额（这里简化处理，实际应该在交易服务中处理余额变化）
-        # self._update_account_balance(account, transaction_data.type, transaction_data.amount)
-
         self.db.commit()
+
+        # 记录余额变化历史
+        balance_service = AccountBalanceHistoryService(self.db)
+        try:
+            balance_service.record_transaction_change(transaction)
+        except Exception:
+            # 如果记录历史失败，不影响交易创建
+            pass
+
         self.db.refresh(transaction)
 
         return transaction

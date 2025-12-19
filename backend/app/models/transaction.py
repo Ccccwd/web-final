@@ -46,6 +46,7 @@ class Transaction(Base):
     category = relationship("Category", back_populates="transactions")
     account = relationship("Account", foreign_keys=[account_id], back_populates="transactions_from")
     to_account = relationship("Account", foreign_keys=[to_account_id], back_populates="transactions_to")
+    balance_history = relationship("AccountBalanceHistory", back_populates="transaction")
 
     def __repr__(self):
         return f"<Transaction(id={self.id}, type='{self.type}', amount={self.amount}, category='{self.category.name if self.category else None}')>"
