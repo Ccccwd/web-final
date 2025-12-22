@@ -41,13 +41,21 @@ def get_db():
 def create_tables():
     """创建所有表"""
     # 导入所有模型以确保它们被注册
-    from app.models import user, category, transaction, account, budget, reminder, statistics
+    from app.models import (
+        user, category, transaction, account, budget, reminder, statistics,
+        import_log, import_error_record, category_suggestion, balance_verification,
+        account_balance_history
+    )
     Base.metadata.create_all(bind=engine)
 
 def drop_tables():
     """删除所有表（仅用于测试）"""
     # 导入所有模型以确保它们被注册
-    from app.models import user, category, transaction, account, budget, reminder, statistics
+    from app.models import (
+        user, category, transaction, account, budget, reminder, statistics,
+        import_log, import_error_record, category_suggestion, balance_verification,
+        account_balance_history
+    )
     Base.metadata.drop_all(bind=engine)
 
 def init_database():

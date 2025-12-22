@@ -38,6 +38,8 @@ class ImportLog(Base):
 
     # 关系
     user = relationship("User", back_populates="import_logs")
+    error_records = relationship("ImportErrorRecord", back_populates="import_log", cascade="all, delete-orphan")
+    balance_verifications = relationship("BalanceVerification", back_populates="import_log", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<ImportLog(id={self.id}, source='{self.source}', status='{self.status}', success={self.success_records}/{self.total_records})>"

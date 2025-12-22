@@ -4,6 +4,7 @@ from fastapi.exceptions import HTTPException, RequestValidationError
 from sqlalchemy.exc import SQLAlchemyError
 from app.config.settings import settings
 from app.api import auth, transactions, statistics, budgets, accounts, categories, import_apis as import_api, account_balance_history, reminders, reports
+from app.api.v1.wechat_import import router as wechat_router
 from app.core.exceptions import (
     custom_exception_handler, http_exception_handler,
     validation_exception_handler, database_exception_handler,
@@ -43,6 +44,7 @@ app.include_router(budgets.router, prefix="/api/budgets", tags=["预算管理"])
 app.include_router(account_balance_history.router, prefix="/api", tags=["账户余额历史"])
 app.include_router(reminders.router, prefix="/api/reminders", tags=["智能提醒"])
 app.include_router(reports.router, prefix="/api/reports", tags=["分析报告"])
+app.include_router(wechat_router, prefix="/api/v1", tags=["微信账单导入"])
 
 @app.get("/")
 async def root():

@@ -73,3 +73,98 @@ class ImportErrorDetail(BaseModel):
     error_type: str = Field(..., description="错误类型")
     error_message: str = Field(..., description="错误消息")
     row_data: Dict[str, Any] = Field(..., description="行数据")
+    suggested_fix: Optional[str] = Field(None, description="建议的修复方法")
+    can_retry: bool = Field(default=False, description="是否可以重试")
+
+class ImportRetryRequest(BaseModel):
+    """导入重试请求"""
+    error_record_ids: List[int] = Field(..., description="要重试的错误记录ID")
+    corrections: Optional[Dict[int, Dict[str, Any]]] = Field(None, description="修正数据")
+    retry_all_fixable: bool = Field(default=False, description="是否重试所有可修复的记录")
+
+class ImportStatistics(BaseModel):
+    """导入统计"""
+    total_imports: int = Field(..., description="总导入次数")
+    successful_imports: int = Field(..., description="成功导入次数")
+    failed_imports: int = Field(..., description="失败导入次数")
+    total_records: int = Field(..., description="总记录数")
+    success_records: int = Field(..., description="成功记录数")
+    failed_records: int = Field(..., description="失败记录数")
+    average_success_rate: float = Field(..., description="平均成功率")
+    most_common_errors: List[Dict[str, Any]] = Field(default=[], description="最常见错误")
+    recent_imports: List[ImportLogResponse] = Field(default=[], description="最近导入记录")
+
+class WechatBillRecord(BaseModel):
+    """微信账单记录"""
+    transaction_time: datetime = Field(..., description="交易时间")
+    transaction_type: str = Field(..., description="交易类型：收入/支出")
+    amount: float = Field(..., description="金额")
+    merchant_name: Optional[str] = Field(None, description="商户名称")
+    category: Optional[str] = Field(None, description="微信分类")
+    payment_method: Optional[str] = Field(None, description="支付方式")
+    remark: Optional[str] = Field(None, description="备注")
+    transaction_id: Optional[str] = Field(None, description="交易单号")
+    out_trade_no: Optional[str] = Field(None, description="商户订单号")
+
+class WechatImportPreview(BaseModel):
+    """微信导入预览"""
+    valid: bool = Field(..., description="文件是否有效")
+    total_records: int = Field(..., description="总记录数")
+    preview_records: List[WechatBillRecord] = Field(..., description="预览记录")
+    summary: Optional[Dict[str, Any]] = Field(None, description="汇总信息")
+    warnings: List[str] = Field(default=[], description="警告信息")
+    errors: List[str] = Field(default=[], description="错误信息")
+    suggested_categories: Dict[str, int] = Field(default={}, description="建议的分类映射")
+    potential_duplicates: int = Field(default=0, description="潜在重复记录数")
+
+class CategorySuggestion(BaseModel):
+    """分类建议"""
+    merchant_name: str = Field(..., description="商户名称")
+    suggested_category_id: int = Field(..., description="建议的分类ID")
+    confidence: float = Field(..., ge=0, le=1, description="置信度")
+    based_on: str = Field(..., description="基于的数据：user_behavior/rules/machine_learning")
+    frequency: int = Field(default=1, description="出现次数")
+    last_updated: datetime
+
+class BalanceVerification(BaseModel):
+    """余额校验"""
+    account_id: int = Field(..., description="账户ID")
+    expected_balance: float = Field(..., description="预期余额")
+    actual_balance: float = Field(..., description="实际余额")
+    difference: float = Field(..., description="差异")
+    verification_time: datetime = Field(..., description="校验时间")
+    is_valid: bool = Field(..., description="是否通过验证")
+    mismatch_details: Optional[List[Dict[str, Any]]] = Field(None, description="不匹配详情")
+
+class SmartCategorizationResult(BaseModel):
+    """智能分类结果"""
+    original_category: str = Field(..., description="原始分类")
+    suggested_category_id: int = Field(..., description="建议分类ID")
+    suggested_category_name: str = Field(..., description="建议分类名称")
+    confidence: float = Field(..., ge=0, le=1, description="置信度")
+    reason: str = Field(..., description="分类原因")
+    similar_transactions: int = Field(default=0, description="相似交易数量")
+    user_feedback: Optional[bool] = Field(None, description="用户反馈")
+
+class LearningRequest(BaseModel):
+    """学习请求"""
+    transaction_id: int = Field(..., description="交易ID")
+    correct_category_id: int = Field(..., description="正确分类ID")
+    original_suggestion_id: Optional[int] = Field(None, description="原始建议ID")
+    feedback_type: str = Field(..., description="反馈类型：confirm/correct")
+    user_notes: Optional[str] = Field(None, description="用户备注")
+
+class LearningBatchRequest(BaseModel):
+    """批量学习请求"""
+    feedback_data: List[LearningRequest] = Field(..., description="反馈数据列表")
+    update_model: bool = Field(default=True, description="是否更新模型")
+
+class UserPreference(BaseModel):
+    """用户偏好"""
+    user_id: int
+    auto_categorize_enabled: bool = Field(default=True)
+    balance_verification_enabled: bool = Field(default=True)
+    duplicate_threshold_days: int = Field(default=7)
+    learning_enabled: bool = Field(default=True)
+    custom_category_mappings: Dict[str, int] = Field(default={})
+    notification_preferences: Dict[str, bool] = Field(default={})

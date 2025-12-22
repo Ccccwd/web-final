@@ -23,6 +23,10 @@ class User(Base):
     reminders = relationship("Reminder", back_populates="user", cascade="all, delete-orphan")
     import_logs = relationship("ImportLog", back_populates="user", cascade="all, delete-orphan")
     balance_history = relationship("AccountBalanceHistory", back_populates="user", cascade="all, delete-orphan")
+    category_suggestions = relationship("CategorySuggestion", back_populates="user", cascade="all, delete-orphan")
+    learning_records = relationship("LearningRecord", back_populates="user", cascade="all, delete-orphan")
+    balance_verifications = relationship("BalanceVerification", back_populates="user", cascade="all, delete-orphan")
+    preferences = relationship("UserPreference", back_populates="user", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<User(id={self.id}, username='{self.username}', email='{self.email}')>"

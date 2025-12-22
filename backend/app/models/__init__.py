@@ -7,6 +7,9 @@ from .reminder import Reminder, ReminderType
 from .statistics_cache import StatisticsCache
 from .import_log import ImportLog, ImportStatus
 from .account_balance_history import AccountBalanceHistory, BalanceChangeType
+from .import_error_record import ImportErrorRecord
+from .category_suggestion import CategorySuggestion, LearningRecord
+from .balance_verification import BalanceVerification, UserPreference
 
 __all__ = [
     "User",
@@ -17,5 +20,8 @@ __all__ = [
     "Reminder", "ReminderType",
     "StatisticsCache",
     "ImportLog", "ImportStatus",
-    "AccountBalanceHistory", "BalanceChangeType"
+    "AccountBalanceHistory", "BalanceChangeType",
+    "ImportErrorRecord",
+    "CategorySuggestion", "LearningRecord",
+    "BalanceVerification", "UserPreference"
 ]
