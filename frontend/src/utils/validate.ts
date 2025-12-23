@@ -232,52 +232,6 @@ export function validateIDCard(idCard: string): {
 }
 
 /**
- * 验证银行卡号
- */
-export function validateBankCard(cardNumber: string): {
-  isValid: boolean
-  message?: string
-} {
-  // 去除所有非数字字符
-  const cleaned = cardNumber.replace(/\D/g, '')
-
-  // 银行卡号长度通常为13-19位
-  if (cleaned.length < 13 || cleaned.length > 19) {
-    return {
-      isValid: false,
-      message: '银行卡号长度应为13-19位'
-    }
-  }
-
-  // Luhn算法验证
-  let sum = 0
-  let isEven = false
-
-  for (let i = cleaned.length - 1; i >= 0; i--) {
-    let digit = parseInt(cleaned[i])
-
-    if (isEven) {
-      digit *= 2
-      if (digit > 9) {
-        digit -= 9
-      }
-    }
-
-    sum += digit
-    isEven = !isEven
-  }
-
-  if (sum % 10 !== 0) {
-    return {
-      isValid: false,
-      message: '银行卡号格式无效'
-    }
-  }
-
-  return { isValid: true }
-}
-
-/**
  * 通用表单验证器
  */
 export class FormValidator {

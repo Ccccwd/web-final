@@ -31,6 +31,7 @@ CREATE TABLE categories (
     is_system BOOLEAN DEFAULT FALSE COMMENT '是否系统预设分类',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    FOREIGN KEY (parent_id) REFERENCES categories(id) ON DELETE CASCADE,
     INDEX idx_type (type),
     INDEX idx_parent (parent_id)
 ) COMMENT '分类表';

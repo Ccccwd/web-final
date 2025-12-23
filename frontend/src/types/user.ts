@@ -51,6 +51,8 @@ export interface Token {
   access_token: string
   refresh_token: string
   token_type: string
+  token?: string  // 别名，与 access_token 相同
+  user?: User     // 登录/注册时返回的用户信息
 }
 
 export interface TokenData {

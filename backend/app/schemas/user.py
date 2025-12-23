@@ -33,6 +33,8 @@ class Token(BaseModel):
     access_token: str
     refresh_token: str
     token_type: str
+    token: str  # 前端期期的字段
+    user: UserResponse  # 用户信息
 
 class TokenData(BaseModel):
     username: Optional[str] = None

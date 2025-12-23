@@ -114,7 +114,7 @@
           <el-icon><DataAnalysis /></el-icon>
           查看统计
         </el-button>
-        <el-button size="large" @click="$router.push('/budget')">
+        <el-button size="large" @click="$router.push('/budgets')">
           <el-icon><Wallet /></el-icon>
           预算管理
         </el-button>

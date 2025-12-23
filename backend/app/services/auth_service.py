@@ -29,7 +29,7 @@ class AuthService:
             return None
         return user
 
-    async def register(self, user_create: UserCreate) -> UserResponse:
+    async def register(self, user_create: UserCreate) -> Token:
         """用户注册"""
         # 检查用户名是否已存在
         if self.get_user_by_username(user_create.username):
@@ -51,7 +51,7 @@ class AuthService:
             username=user_create.username,
             email=user_create.email,
             password=hashed_password,
-            phone=user_create.phone,
+            phone=user_create.phone if user_create.phone else None,
             is_active=True
         )
 
@@ -59,14 +59,32 @@ class AuthService:
         self.db.commit()
         self.db.refresh(db_user)
 
-        return UserResponse(
-            id=db_user.id,
-            username=db_user.username,
-            email=db_user.email,
-            phone=db_user.phone,
-            avatar=db_user.avatar,
-            is_active=db_user.is_active,
-            created_at=db_user.created_at
+        # 创建访问令牌
+        access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)
+        access_token = create_access_token(
+            data={"sub": db_user.username, "user_id": db_user.id},
+            expires_delta=access_token_expires
+        )
+
+        # 创建刷新令牌
+        refresh_token = create_refresh_token(
+            data={"sub": db_user.username, "user_id": db_user.id}
+        )
+
+        return Token(
+            access_token=access_token,
+            refresh_token=refresh_token,
+            token_type="bearer",
+            token=access_token,
+            user=UserResponse(
+                id=db_user.id,
+                username=db_user.username,
+                email=db_user.email,
+                phone=db_user.phone,
+                avatar=db_user.avatar,
+                is_active=db_user.is_active,
+                created_at=db_user.created_at
+            )
         )
 
     async def login(self, user_login: UserLogin) -> Token:
@@ -100,7 +118,17 @@ class AuthService:
         return Token(
             access_token=access_token,
             refresh_token=refresh_token,
-            token_type="bearer"
+            token_type="bearer",
+            token=access_token,  # 前端使用
+            user=UserResponse(
+                id=user.id,
+                username=user.username,
+                email=user.email,
+                phone=user.phone,
+                avatar=user.avatar,
+                is_active=user.is_active,
+                created_at=user.created_at
+            )
         )
 
     async def refresh_token(self, refresh_token: str) -> Token:

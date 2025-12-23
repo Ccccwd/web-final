@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, Enum
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, Enum, ForeignKey
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.config.database import Base
@@ -16,7 +16,7 @@ class Category(Base):
     type = Column(Enum(CategoryType), nullable=False, comment="分类类型: 收入/支出")
     icon = Column(String(50), comment="图标(emoji)")
     color = Column(String(20), comment="颜色")
-    parent_id = Column(Integer, comment="父分类ID(支持二级分类)")
+    parent_id = Column(Integer, ForeignKey('categories.id'), comment="父分类ID(支持二级分类)")
     sort_order = Column(Integer, default=0, comment="排序")
     is_system = Column(Boolean, default=False, comment="是否系统预设分类")
     created_at = Column(DateTime(timezone=True), server_default=func.now(), comment="创建时间")
@@ -25,7 +25,7 @@ class Category(Base):
     # 关系
     transactions = relationship("Transaction", back_populates="category")
     budgets = relationship("Budget", back_populates="category")
-    children = relationship("Category", remote_side=[id])
+    children = relationship("Category", backref="parent", remote_side=[id])
 
     def __repr__(self):
         return f"<Category(id={self.id}, name='{self.name}', type='{self.type}')>"

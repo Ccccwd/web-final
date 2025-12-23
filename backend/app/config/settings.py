@@ -1,4 +1,4 @@
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import Optional
 import os
 
@@ -8,10 +8,10 @@ class Settings(BaseSettings):
     debug: bool = True
 
     # 数据库配置
-    database_url: str = "mysql://root:password@localhost:3306/finance_system"
+    database_url: str = "mysql://root:root123456@localhost:3307/finance_system"
 
     # Redis配置
-    redis_url: str = "redis://localhost:6379/0"
+    redis_url: str = "redis://localhost:6380/0"
 
     # JWT配置
     secret_key: str = "your-secret-key-here-change-in-production"
@@ -19,12 +19,16 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 30
 
     # CORS配置
-    allowed_origins: list = ["http://localhost:3000"]
+    allowed_origins: str = "http://localhost:5173,http://localhost:3000"
 
     # 文件导出配置
     export_path: str = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "exports")
+    
+    @property
+    def cors_origins(self) -> list[str]:
+        """将逗号分隔的字符串转换为列表"""
+        return [origin.strip() for origin in self.allowed_origins.split(",")]
 
-    class Config:
-        env_file = ".env"
+    model_config = SettingsConfigDict(env_file=".env",extra="ignore")
 
 settings = Settings()

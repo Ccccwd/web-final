@@ -37,16 +37,6 @@
           />
         </el-form-item>
 
-        <el-form-item prop="phone">
-          <el-input
-            v-model="registerForm.phone"
-            placeholder="请输入手机号码（可选）"
-            prefix-icon="Phone"
-            clearable
-            :disabled="loading"
-          />
-        </el-form-item>
-
         <el-form-item prop="password">
           <el-input
             v-model="registerForm.password"
@@ -61,7 +51,7 @@
 
         <el-form-item prop="confirmPassword">
           <el-input
-            v-model="confirmPassword"
+            v-model="registerForm.confirmPassword"
             type="password"
             placeholder="请确认密码"
             prefix-icon="Lock"
@@ -127,15 +117,12 @@ const userStore = useUserStore()
 const registerFormRef = ref<InstanceType<typeof ElForm>>()
 
 // 表单数据
-const registerForm = reactive<UserCreate>({
+const registerForm = reactive({
   username: '',
   email: '',
   password: '',
-  phone: ''
+  confirmPassword: ''
 })
-
-// 确认密码
-const confirmPassword = ref('')
 
 // 同意条款
 const agreeToTerms = ref(false)
@@ -145,11 +132,15 @@ const loading = ref(false)
 
 // 密码验证器
 const validateConfirmPassword = (rule: any, value: any, callback: any) => {
+  if (!value) {
+    callback(new Error('请确认密码'))
+    return
+  }
   if (value !== registerForm.password) {
     callback(new Error('两次输入的密码不一致'))
-  } else {
-    callback()
+    return
   }
+  callback()
 }
 
 // 表单验证规则
@@ -162,9 +153,6 @@ const registerRules = {
   email: [
     { required: true, message: '请输入邮箱地址', trigger: 'blur' },
     { type: 'email' as const, message: '请输入正确的邮箱地址', trigger: 'blur' }
-  ],
-  phone: [
-    { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号码', trigger: 'blur' }
   ],
   password: [
     { required: true, message: '请输入密码', trigger: 'blur' },
@@ -192,7 +180,9 @@ const handleRegister = async () => {
 
     loading.value = true
 
-    const success = await userStore.register(registerForm)
+    // 提取注册数据，移除confirmPassword
+    const { confirmPassword, ...registerData } = registerForm
+    const success = await userStore.register(registerData as UserCreate)
 
     if (success) {
       ElMessageBox.alert(

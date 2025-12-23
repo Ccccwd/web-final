@@ -16,10 +16,17 @@ router = APIRouter()
 async def register(user: UserCreate, db: Session = Depends(get_db)):
     """用户注册"""
     try:
+        # 调试日志
+        print(f"收到注册请求 - 用户名: {user.username}, 密码长度: {len(user.password)} 字节")
+        print(f"密码内容: {repr(user.password)}")
+        
         auth_service = AuthService(db)
         result = await auth_service.register(user)
-        return success_response(data=result.dict(), message="注册成功")
+        return success_response(data=result.model_dump(), message="注册成功")
     except Exception as e:
+        print(f"注册失败: {str(e)}")
+        import traceback
+        traceback.print_exc()
         if isinstance(e, BusinessException):
             raise e
         raise BusinessException(f"注册失败: {str(e)}")
@@ -30,7 +37,7 @@ async def login(user: UserLogin, db: Session = Depends(get_db)):
     try:
         auth_service = AuthService(db)
         result = await auth_service.login(user)
-        return success_response(data=result.dict(), message="登录成功")
+        return success_response(data=result.model_dump(), message="登录成功")
     except Exception as e:
         if isinstance(e, BusinessException):
             raise e
@@ -83,7 +90,7 @@ async def reset_password(
             raise e
         raise BusinessException(f"密码重置失败: {str(e)}")
 
-@router.get("/me", response_model=UserResponse)
+@router.get("/me")
 async def get_current_user_info(
     current_user = Depends(get_current_active_user),
     db: Session = Depends(get_db)
@@ -98,7 +105,7 @@ async def get_current_user_info(
             raise e
         raise BusinessException(f"获取用户信息失败: {str(e)}")
 
-@router.put("/me", response_model=UserResponse)
+@router.put("/me")
 async def update_current_user_info(
     user_update: dict,
     current_user = Depends(get_current_active_user),

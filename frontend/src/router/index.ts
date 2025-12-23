@@ -118,37 +118,43 @@ router.beforeEach(async (to, from, next) => {
     document.title = '个人记账系统'
   }
 
-  // 显示加载状态
-  const loading = document.createElement('div')
-  loading.className = 'route-loading'
-  loading.innerHTML = '加载中...'
-  loading.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;padding:20px;background:rgba(0,0,0,0.8);color:white;border-radius:8px;'
-  document.body.appendChild(loading)
-
   try {
     // 检查是否需要认证
     const requiresAuth = to.matched.some(record => record.meta?.requiresAuth)
     const requiresGuest = to.matched.some(record => record.meta?.requiresGuest)
 
-    // 如果用户未初始化，先初始化
-    if (!userStore.isLoggedIn && !userStore.isLoading) {
-      await userStore.initializeAuth()
+    // 如果需要认证，检查登录状态
+    if (requiresAuth) {
+      const hasToken = !!userStore.token
+      
+      if (!hasToken) {
+        // 没有token，跳转到登录页
+        ElMessage.warning('请先登录')
+        next({
+          path: '/auth/login',
+          query: { redirect: to.fullPath }
+        })
+        return
+      }
+      
+      // 有token但没有用户信息，尝试获取
+      if (!userStore.user) {
+        try {
+          await userStore.fetchUserInfo()
+        } catch (error) {
+          console.error('获取用户信息失败:', error)
+          ElMessage.error('登录状态已过期，请重新登录')
+          next({
+            path: '/auth/login',
+            query: { redirect: to.fullPath }
+          })
+          return
+        }
+      }
     }
 
-    // 检查认证状态
-    if (requiresAuth && !userStore.isLoggedIn) {
-      // 需要认证但未登录，跳转到登录页
-      ElMessage.warning('请先登录')
-      next({
-        path: '/auth/login',
-        query: { redirect: to.fullPath }
-      })
-      return
-    }
-
+    // 如果需要游客状态但已登录
     if (requiresGuest && userStore.isLoggedIn) {
-      // 需要游客状态但已登录，跳转到首页
-      ElMessage.info('您已经登录')
       next('/dashboard')
       return
     }
@@ -157,21 +163,11 @@ router.beforeEach(async (to, from, next) => {
     next()
   } catch (error) {
     console.error('路由守卫错误:', error)
-
-    // 发生错误时，根据情况处理
+    // 出错时，如果是需要认证的页面，跳转到登录页
     if (to.matched.some(record => record.meta?.requiresAuth)) {
-      ElMessage.error('验证登录状态失败，请重新登录')
-      next({
-        path: '/auth/login',
-        query: { redirect: to.fullPath }
-      })
+      next('/auth/login')
     } else {
       next()
-    }
-  } finally {
-    // 关闭加载状态
-    if (loading.parentNode) {
-      loading.parentNode.removeChild(loading)
     }
   }
 })
