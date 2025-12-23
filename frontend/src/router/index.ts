@@ -63,16 +63,40 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true, title: '统计分析' }
   },
   {
+    path: '/wechat/import',
+    name: 'WechatImport',
+    component: () => import('@/views/import/WechatImport.vue'),
+    meta: { requiresAuth: true, title: '微信账单导入' }
+  },
+  {
     path: '/budgets',
     name: 'Budgets',
     component: () => import('@/views/budget/BudgetList.vue'),
     meta: { requiresAuth: true, title: '预算管理' }
   },
   {
+    path: '/budget',
+    redirect: '/budgets'
+  },
+  {
+    path: '/reminders',
+    name: 'Reminders',
+    component: () => import('@/views/reminder/ReminderManagement.vue'),
+    meta: { requiresAuth: true, title: '提醒管理' }
+  },
+  {
+    path: '/reminder',
+    redirect: '/reminders'
+  },
+  {
     path: '/accounts',
     name: 'Accounts',
     component: () => import('@/views/account/AccountList.vue'),
     meta: { requiresAuth: true, title: '账户管理' }
+  },
+  {
+    path: '/account',
+    redirect: '/accounts'
   },
   {
     path: '/settings',

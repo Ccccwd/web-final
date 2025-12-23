@@ -106,7 +106,7 @@
         <h3>快速操作</h3>
       </div>
       <div class="action-buttons">
-        <el-button type="primary" size="large" @click="$router.push('/transaction/add')">
+        <el-button type="primary" size="large" @click="$router.push('/transactions/add')">
           <el-icon><Plus /></el-icon>
           记一笔
         </el-button>
