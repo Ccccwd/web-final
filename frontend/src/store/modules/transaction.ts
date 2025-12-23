@@ -68,7 +68,7 @@ export const useTransactionStore = defineStore('transaction', () => {
 
       const response = await http.get<Transaction[]>('/transactions', {
         params: queryParams
-      })
+      } as any)
 
       if (response.success && response.data) {
         transactions.value = response.data
@@ -221,7 +221,7 @@ export const useTransactionStore = defineStore('transaction', () => {
 
       const response = await http.get<TransactionSummary>('/transactions/summary', {
         params: queryParams
-      })
+      } as any)
 
       if (response.success && response.data) {
         summary.value = response.data

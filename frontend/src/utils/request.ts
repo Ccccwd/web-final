@@ -8,7 +8,6 @@ interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
   showLoading?: boolean
   showError?: boolean
   skipAuth?: boolean
-  headers?: any
 }
 
 let loadingInstance: any = null
@@ -47,16 +46,18 @@ const request: AxiosInstance = axios.create({
 
 // 请求拦截器
 request.interceptors.request.use(
-  (config: CustomAxiosRequestConfig) => {
+  (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
+    const customConfig = config as CustomAxiosRequestConfig
+    
     // 显示加载动画
-    if (config.showLoading !== false) {
+    if (customConfig.showLoading !== false) {
       showLoading()
     }
 
     // 添加认证token
     const userStore = useUserStore()
-    if (!config.skipAuth && userStore.token) {
-      config.headers = config.headers || {}
+    if (!customConfig.skipAuth && userStore.token) {
+      config.headers = config.headers || {} as any
       config.headers.Authorization = `Bearer ${userStore.token}`
     }
 
@@ -70,7 +71,7 @@ request.interceptors.request.use(
 
 // 响应拦截器
 request.interceptors.response.use(
-  (response: AxiosResponse<APIResponse>) => {
+  (response: AxiosResponse<APIResponse>): any => {
     // 隐藏加载动画
     const config = response.config as CustomAxiosRequestConfig
     if (config.showLoading !== false) {
@@ -80,8 +81,8 @@ request.interceptors.response.use(
     const { data } = response
 
     // 检查业务状态码
-    if (data.code === 200) {
-      return data
+    if (data.code === 200 || data.success) {
+      return Promise.resolve(data)
     } else {
       // 业务错误
       const errorMessage = data.message || '请求失败'
@@ -106,7 +107,7 @@ request.interceptors.response.use(
         case 401:
           // 未授权，跳转到登录页
           const userStore = useUserStore()
-          userStore.logout()
+          userStore.logoutAction()
           ElMessage.error('登录已过期，请重新登录')
           // 可以在这里使用路由跳转到登录页
           // router.push('/login')

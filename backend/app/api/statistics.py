@@ -9,7 +9,7 @@ from app.config.database import get_db
 from app.models.transaction import Transaction, TransactionType
 from app.models.category import Category
 from app.models.account import Account
-from app.utils.response import success_response, error_response
+from app.core.responses import success_response, error_response
 from app.utils.export import export_statistics_to_excel
 
 router = APIRouter()
@@ -150,7 +150,7 @@ async def get_overview(
         })
 
     except Exception as e:
-        return error_response(f"获取概览数据失败: {str(e)}")
+        return error_response(500, f"获取概览数据失败: {str(e)}")
 
 @router.get("/trend")
 async def get_trend(
@@ -189,11 +189,11 @@ async def get_trend(
             "period": period,
             "start_date": start_dt.strftime("%Y-%m-%d"),
             "end_date": end_dt.strftime("%Y-%m-%d"),
-            "data": trend_data
+            "trend": trend_data
         })
 
     except Exception as e:
-        return error_response(f"获取趋势数据失败: {str(e)}")
+        return error_response(500, f"获取趋势数据失败: {str(e)}")
 
 @router.get("/category")
 async def get_category_statistics(
@@ -269,7 +269,7 @@ async def get_category_statistics(
         })
 
     except Exception as e:
-        return error_response(f"获取分类统计失败: {str(e)}")
+        return error_response(500, f"获取分类统计失败: {str(e)}")
 
 @router.get("/export/excel")
 async def export_excel(
@@ -309,7 +309,7 @@ async def export_excel(
         })
 
     except Exception as e:
-        return error_response(f"导出Excel失败: {str(e)}")
+        return error_response(500, f"导出Excel失败: {str(e)}")
 
 def calculate_growth_rate(current: Decimal, previous: Decimal) -> float:
     """计算增长率"""

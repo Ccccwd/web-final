@@ -9,7 +9,7 @@ from app.config.database import get_db
 from app.models.budget import Budget, PeriodType
 from app.models.category import Category
 from app.models.transaction import Transaction, TransactionType
-from app.utils.response import success_response, error_response
+from app.core.responses import success_response, error_response
 
 router = APIRouter()
 
@@ -75,7 +75,7 @@ async def get_budgets(
         })
 
     except Exception as e:
-        return error_response(f"获取预算列表失败: {str(e)}")
+        return error_response(500, f"获取预算列表失败: {str(e)}")
 
 @router.post("/")
 async def create_budget(
@@ -140,9 +140,9 @@ async def create_budget(
         })
 
     except ValueError as e:
-        return error_response(str(e))
+        return error_response(400, str(e))
     except Exception as e:
-        return error_response(f"创建预算失败: {str(e)}")
+        return error_response(500, f"创建预算失败: {str(e)}")
 
 @router.put("/{budget_id}")
 async def update_budget(
@@ -180,9 +180,9 @@ async def update_budget(
         })
 
     except ValueError as e:
-        return error_response(str(e))
+        return error_response(400, str(e))
     except Exception as e:
-        return error_response(f"更新预算失败: {str(e)}")
+        return error_response(500, f"更新预算失败: {str(e)}")
 
 @router.delete("/{budget_id}")
 async def delete_budget(
@@ -203,9 +203,9 @@ async def delete_budget(
         })
 
     except ValueError as e:
-        return error_response(str(e))
+        return error_response(400, str(e))
     except Exception as e:
-        return error_response(f"删除预算失败: {str(e)}")
+        return error_response(500, f"删除预算失败: {str(e)}")
 
 @router.get("/summary")
 async def get_budget_summary(
@@ -281,7 +281,7 @@ async def get_budget_summary(
         })
 
     except Exception as e:
-        return error_response(f"获取预算汇总失败: {str(e)}")
+        return error_response(500, f"获取预算汇总失败: {str(e)}")
 
 @router.get("/alerts")
 async def get_budget_alerts(
@@ -335,7 +335,7 @@ async def get_budget_alerts(
         })
 
     except Exception as e:
-        return error_response(f"获取预算预警失败: {str(e)}")
+        return error_response(500, f"获取预算预警失败: {str(e)}")
 
 def get_actual_spending(db: Session, budget: Budget) -> Decimal:
     """计算预算期间的实际支出"""

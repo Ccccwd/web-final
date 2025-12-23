@@ -17,7 +17,7 @@ from app.schemas.import_log import (
 from app.services.smart_categorization_service import SmartCategorizationService
 from app.services.import_error_analysis_service import ImportErrorAnalysisService
 from app.services.balance_verification_service import BalanceVerificationService
-from app.core.auth import get_current_user
+from app.core.dependencies import get_current_user
 from app.core.exceptions import NotFoundError, ValidationError
 from app.wechat_parser import parse_wechat_csv
 

@@ -302,8 +302,10 @@
           <div class="history-chart">
             <LineChart
               :data="balanceChartData"
-              :options="chartOptions"
               height="300px"
+              :show-balance="true"
+              :show-income="false"
+              :show-expense="false"
             />
           </div>
         </div>
@@ -343,14 +345,29 @@
 import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Money, CreditCard, Wallet, Iphone, Food } from '@element-plus/icons-vue'
-import { accountApi } from '@/api/accounts'
-import { formatCurrency, formatDate } from '@/utils/format'
+import * as accountApi from '@/api/account'
+import { formatAmount, formatDate } from '@/utils/format'
 import LineChart from '@/components/charts/LineChart.vue'
+
+// 类型定义
+interface AccountSummary {
+  total_balance: number
+  account_count: number
+  type_stats: Record<string, { count: number; balance: number }>
+  enabled_count: number
+  disabled_count: number
+}
 
 // 响应式数据
 const loading = ref(false)
 const accounts = ref([])
-const accountSummary = ref({})
+const accountSummary = ref<AccountSummary>({
+  total_balance: 0,
+  account_count: 0,
+  type_stats: {},
+  enabled_count: 0,
+  disabled_count: 0
+})
 const showCreateDialog = ref(false)
 const showTransferDialog = ref(false)
 const showDetailDrawer = ref(false)
@@ -404,51 +421,26 @@ const enabledAccounts = computed(() => {
 })
 
 const balanceChartData = computed(() => {
-  return {
-    labels: balanceHistory.value.map(item => formatDate(item.created_at)),
-    datasets: [{
-      label: '账户余额',
-      data: balanceHistory.value.map(item => Number(item.amount_after)),
-      borderColor: '#409EFF',
-      backgroundColor: 'rgba(64, 158, 255, 0.1)',
-      tension: 0.4
-    }]
-  }
+  return balanceHistory.value.map(item => ({
+    date: formatDate(item.created_at),
+    balance: Number(item.amount_after)
+  }))
 })
-
-const chartOptions = {
-  responsive: true,
-  plugins: {
-    legend: {
-      display: true
-    }
-  },
-  scales: {
-    y: {
-      beginAtZero: false,
-      ticks: {
-        callback: function(value) {
-          return '¥' + value.toLocaleString()
-        }
-      }
-    }
-  }
-}
 
 // 方法定义
 const loadAccounts = async () => {
   try {
     loading.value = true
-    const params = {}
+    const params: Record<string, any> = {}
     if (filters.type) params.type = filters.type
     if (filters.is_enabled !== null) params.is_enabled = filters.is_enabled
 
     const response = await accountApi.getAccounts(params)
-    accounts.value = response.data.accounts
+    accounts.value = response.data.data.accounts
 
     // 加载账户统计
     const summaryResponse = await accountApi.getAccountSummary()
-    accountSummary.value = summaryResponse.data
+    accountSummary.value = summaryResponse.data.data
   } catch (error) {
     ElMessage.error('加载账户列表失败')
   } finally {
@@ -598,7 +590,7 @@ const viewAccountDetail = async (account) => {
   try {
     // 加载余额历史
     const historyResponse = await accountApi.getBalanceHistory(account.id)
-    balanceHistory.value = historyResponse.data
+    balanceHistory.value = historyResponse.data.data
 
     // 加载最近交易记录（这里需要调用交易API）
     // recentTransactions.value = await transactionApi.getRecentTransactions(account.id)
@@ -616,7 +608,11 @@ const getMaxTransferAmount = () => {
 const confirmTransfer = async () => {
   try {
     transferLoading.value = true
-    await accountApi.transfer(transferForm)
+    const transferData = {
+      ...transferForm,
+      transaction_date: transferForm.transaction_date.toISOString()
+    }
+    await accountApi.transfer(transferData)
     ElMessage.success('转账成功')
     showTransferDialog.value = false
     loadAccounts()

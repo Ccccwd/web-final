@@ -7,8 +7,8 @@ import json
 from app.models.account import Account
 from app.models.transaction import Transaction, TransactionType
 from app.models.import_log import ImportLog
-from app.models.balance_verification import BalanceVerification
-from app.models.user import User, UserPreference
+from app.models.balance_verification import BalanceVerification, UserPreference
+from app.models.user import User
 from app.models.account_balance_history import AccountBalanceHistory
 from app.core.exceptions import NotFoundError, ValidationError
 

@@ -10,6 +10,11 @@ export function formatAmount(amount: number | string, currency = '¥'): string {
 }
 
 /**
+ * 格式化货币（formatCurrency 的别名）
+ */
+export const formatCurrency = formatAmount
+
+/**
  * 格式化日期时间
  */
 export function formatDateTime(

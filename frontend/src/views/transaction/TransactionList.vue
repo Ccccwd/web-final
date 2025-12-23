@@ -280,7 +280,9 @@ import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Upload, Search } from '@element-plus/icons-vue'
-import { transactionAPI, categoryAPI, accountAPI } from '@/api'
+import * as transactionApi from '@/api/transaction'
+import * as categoryApi from '@/api/category'
+import * as accountApi from '@/api/account'
 import WechatImport from '@/components/import/WechatImport.vue'
 
 const router = useRouter()
@@ -336,7 +338,7 @@ const loadTransactions = async () => {
   try {
     loading.value = true
 
-    const params = {
+    const params: Record<string, any> = {
       page: pagination.page,
       page_size: pagination.page_size,
       ...filters
@@ -348,9 +350,9 @@ const loadTransactions = async () => {
       params.sort_order = sortConfig.value.order === 'descending' ? 'desc' : 'asc'
     }
 
-    const response = await transactionAPI.getTransactions(params)
-    transactions.value = response.transactions || []
-    pagination.total = response.total || 0
+    const response = await transactionApi.getTransactions(params)
+    transactions.value = response.data.data || []
+    pagination.total = response.data.pagination.total || 0
 
   } catch (error) {
     console.error('加载交易记录失败:', error)
@@ -362,16 +364,17 @@ const loadTransactions = async () => {
 
 const loadSummary = async () => {
   try {
-    const params = {}
+    const params: Record<string, any> = {}
     if (filters.start_date) params.start_date = filters.start_date
     if (filters.end_date) params.end_date = filters.end_date
 
-    const response = await transactionAPI.getTransactionSummary(params)
+    const response = await transactionApi.getStatistics(params)
+    const data = response.data.data
     summary.value = {
-      total_income: formatNumber(response.total_income || 0),
-      total_expense: formatNumber(response.total_expense || 0),
-      net_income: formatNumber(response.net_income || 0),
-      transaction_count: response.transaction_count || 0
+      total_income: formatNumber(data.total_income || 0),
+      total_expense: formatNumber(data.total_expense || 0),
+      net_income: formatNumber(data.net_income || 0),
+      transaction_count: data.transaction_count || 0
     }
 
   } catch (error) {
@@ -381,8 +384,8 @@ const loadSummary = async () => {
 
 const loadCategories = async () => {
   try {
-    const response = await categoryAPI.getCategories()
-    categories.value = response.categories || []
+    const response = await categoryApi.getCategories()
+    categories.value = response.data.data || []
   } catch (error) {
     console.error('加载分类失败:', error)
   }
@@ -390,8 +393,8 @@ const loadCategories = async () => {
 
 const loadAccounts = async () => {
   try {
-    const response = await accountAPI.getAccounts()
-    accounts.value = response.accounts || []
+    const response = await accountApi.getAccounts()
+    accounts.value = response.data.data.accounts || []
   } catch (error) {
     console.error('加载账户失败:', error)
   }
@@ -459,7 +462,7 @@ const deleteTransaction = async (transaction: any) => {
       }
     )
 
-    await transactionAPI.deleteTransaction(transaction.id)
+    await transactionApi.deleteTransaction(transaction.id)
     ElMessage.success('删除成功')
     loadTransactions()
     loadSummary()

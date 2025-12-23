@@ -80,3 +80,21 @@ export function importTransactions(data: {
 }) {
   return request.post<{ message: string; data: any }>('/transactions/import', data)
 }
+
+/**
+ * 获取交易统计数据
+ */
+export function getStatistics(params?: {
+  start_date?: string
+  end_date?: string
+  type?: string
+}) {
+  return request.get<{
+    data: {
+      total_income: number
+      total_expense: number
+      net_income: number
+      transaction_count: number
+    }
+  }>('/transactions/statistics', { params })
+}

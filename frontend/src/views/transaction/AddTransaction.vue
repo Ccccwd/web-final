@@ -172,7 +172,9 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage, ElForm } from 'element-plus'
 import { useRouter } from 'vue-router'
 import type { FormInstance, FormRules } from 'element-plus'
-import { transactionAPI, categoryAPI, accountAPI } from '@/api'
+import * as transactionApi from '@/api/transaction'
+import * as categoryApi from '@/api/category'
+import * as accountApi from '@/api/account'
 
 const router = useRouter()
 
@@ -280,12 +282,12 @@ const loadData = async () => {
     formData.transaction_date = now.toISOString().slice(0, 19).replace('T', ' ')
 
     // 加载分类
-    const categoriesResponse = await categoryAPI.getCategories()
-    categories.value = categoriesResponse.categories || []
+    const categoriesResponse = await categoryApi.getCategories()
+    categories.value = categoriesResponse.data.data || []
 
     // 加载账户
-    const accountsResponse = await accountAPI.getAccounts()
-    accounts.value = accountsResponse.accounts || []
+    const accountsResponse = await accountApi.getAccounts()
+    accounts.value = accountsResponse.data.data.accounts || []
 
     // 设置默认账户
     if (accounts.value.length > 0) {
@@ -321,12 +323,12 @@ const submitTransaction = async () => {
     submitting.value = true
 
     // 提交数据
-    const submitData = {
+    const submitData: any = {
       ...formData,
       amount: formData.amount
     }
 
-    await transactionAPI.createTransaction(submitData)
+    await transactionApi.createTransaction(submitData)
 
     ElMessage.success('记账成功')
 

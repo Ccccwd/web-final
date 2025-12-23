@@ -32,8 +32,8 @@ export const useStatisticsStore = defineStore('statistics', () => {
       loading.value = true
       error.value = null
       const response = await getOverview(params)
-      overview.value = response.data
-      return response.data
+      overview.value = response.data.data
+      return response.data.data
     } catch (err: any) {
       error.value = err.message || '获取概览数据失败'
       throw err
@@ -73,8 +73,8 @@ export const useStatisticsStore = defineStore('statistics', () => {
       loading.value = true
       error.value = null
       const response = await getCategoryStatistics(params)
-      categoryStats.value = response.data
-      return response.data
+      categoryStats.value = response.data.data
+      return response.data.data
     } catch (err: any) {
       error.value = err.message || '获取分类统计失败'
       throw err

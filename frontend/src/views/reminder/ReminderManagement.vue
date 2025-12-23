@@ -281,13 +281,26 @@ import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Bell, Clock, Warning, DataAnalysis, Refresh } from '@element-plus/icons-vue'
 import { reminderApi } from '@/api/reminders'
-import { categoryApi } from '@/api/categories'
+import * as categoryApi from '@/api/category'
 import { formatDateTime, formatTime } from '@/utils/format'
+
+// 类型定义
+interface ReminderStats {
+  total_reminders: number
+  enabled_reminders: number
+  disabled_reminders: number
+  type_stats: Record<string, number>
+}
 
 // 响应式数据
 const loading = ref(false)
 const reminders = ref([])
-const reminderStats = ref({})
+const reminderStats = ref<ReminderStats>({
+  total_reminders: 0,
+  enabled_reminders: 0,
+  disabled_reminders: 0,
+  type_stats: {}
+})
 const expenseCategories = ref([])
 const showCreateDialog = ref(false)
 const editingReminder = ref(null)
@@ -328,16 +341,16 @@ const needRemindTime = computed(() => {
 const loadReminders = async () => {
   try {
     loading.value = true
-    const params = {}
+    const params: Record<string, any> = {}
     if (filters.type) params.type = filters.type
     if (filters.is_enabled !== null) params.is_enabled = filters.is_enabled
 
     const response = await reminderApi.getReminders(params)
-    reminders.value = response.data.reminders
+    reminders.value = response.data.data.reminders
 
     // 加载提醒统计
     const statsResponse = await reminderApi.getReminderStatistics()
-    reminderStats.value = statsResponse.data
+    reminderStats.value = statsResponse.data.data || reminderStats.value
   } catch (error) {
     ElMessage.error('加载提醒列表失败')
   } finally {
@@ -347,8 +360,8 @@ const loadReminders = async () => {
 
 const loadCategories = async () => {
   try {
-    const response = await categoryApi.getCategories({ type: 'expense' })
-    expenseCategories.value = response.data.categories
+    const response = await categoryApi.getCategories()
+    expenseCategories.value = response.data.data.filter((c: any) => c.type === 'expense')
   } catch (error) {
     console.error('加载分类列表失败:', error)
   }
@@ -438,7 +451,7 @@ const editReminder = (reminder) => {
 const saveReminder = async () => {
   try {
     saveLoading.value = true
-    const formData = { ...reminderForm }
+    const formData: any = { ...reminderForm }
 
     // 处理时间格式
     if (formData.remind_time) {
@@ -501,10 +514,10 @@ const deleteReminder = async (reminder) => {
 const checkDailyReminder = async () => {
   try {
     const response = await reminderApi.checkDailyReminder()
-    if (response.data.reminder_created) {
+    if (response.data.data.reminder_created) {
       ElMessage.success('已为您创建每日记账提醒')
     } else {
-      ElMessage.info(response.data.message || '暂无需创建提醒')
+      ElMessage.info(response.data.data.message || '暂无需创建提醒')
     }
     loadReminders()
   } catch (error) {
@@ -515,7 +528,7 @@ const checkDailyReminder = async () => {
 const createFromTemplate = async (templateType) => {
   try {
     const response = await reminderApi.getTemplate(templateType)
-    const template = response.data
+    const template = response.data.data
 
     Object.assign(reminderForm, {
       type: template.type,
