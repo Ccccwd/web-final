@@ -5,7 +5,7 @@ from app.models.user import User
 from app.utils.security import get_password_hash, verify_password
 from app.utils.jwt_utils import create_access_token, create_refresh_token
 from app.config.settings import settings
-from datetime import datetime, timedelta
+from datetime import timedelta
 from typing import Optional
 
 class AuthService:

@@ -9,12 +9,7 @@ const routes: RouteRecordRaw[] = [
     path: '/',
     redirect: '/dashboard'
   },
-  {
-    path: '/dashboard',
-    name: 'Dashboard',
-    component: () => import('@/views/home/Dashboard.vue'),
-    meta: { requiresAuth: true, title: '仪表盘' }
-  },
+  // 认证相关路由（无布局）
   {
     path: '/auth',
     children: [
@@ -38,77 +33,91 @@ const routes: RouteRecordRaw[] = [
       }
     ]
   },
+  // 主应用路由（带布局）
   {
-    path: '/transactions',
-    name: 'Transactions',
-    component: () => import('@/views/transaction/TransactionList.vue'),
-    meta: { requiresAuth: true, title: '交易记录' }
-  },
-  {
-    path: '/transactions/add',
-    name: 'AddTransaction',
-    component: () => import('@/views/transaction/AddTransaction.vue'),
-    meta: { requiresAuth: true, title: '添加交易' }
-  },
-  {
-    path: '/transactions/:id/edit',
-    name: 'EditTransaction',
-    component: () => import('@/views/transaction/AddTransaction.vue'),
-    meta: { requiresAuth: true, title: '编辑交易' }
-  },
-  {
-    path: '/statistics',
-    name: 'Statistics',
-    component: () => import('@/views/statistics/Overview.vue'),
-    meta: { requiresAuth: true, title: '统计分析' }
-  },
-  {
-    path: '/wechat/import',
-    name: 'WechatImport',
-    component: () => import('@/views/import/WechatImport.vue'),
-    meta: { requiresAuth: true, title: '微信账单导入' }
-  },
-  {
-    path: '/budgets',
-    name: 'Budgets',
-    component: () => import('@/views/budget/BudgetList.vue'),
-    meta: { requiresAuth: true, title: '预算管理' }
-  },
-  {
-    path: '/budget',
-    redirect: '/budgets'
-  },
-  {
-    path: '/reminders',
-    name: 'Reminders',
-    component: () => import('@/views/reminder/ReminderManagement.vue'),
-    meta: { requiresAuth: true, title: '提醒管理' }
-  },
-  {
-    path: '/reminder',
-    redirect: '/reminders'
-  },
-  {
-    path: '/accounts',
-    name: 'Accounts',
-    component: () => import('@/views/account/AccountList.vue'),
-    meta: { requiresAuth: true, title: '账户管理' }
-  },
-  {
-    path: '/account',
-    redirect: '/accounts'
-  },
-  {
-    path: '/settings',
-    name: 'Settings',
-    component: () => import('@/views/settings/Settings.vue'),
-    meta: { requiresAuth: true, title: '系统设置' }
-  },
-  {
-    path: '/profile',
-    name: 'Profile',
-    component: () => import('@/views/settings/Profile.vue'),
-    meta: { requiresAuth: true, title: '个人资料' }
+    path: '/',
+    component: () => import('@/layouts/MainLayout.vue'),
+    meta: { requiresAuth: true },
+    children: [
+      {
+        path: 'dashboard',
+        name: 'Dashboard',
+        component: () => import('@/views/home/Dashboard.vue'),
+        meta: { requiresAuth: true, title: '仪表盘' }
+      },
+      {
+        path: 'transactions',
+        name: 'Transactions',
+        component: () => import('@/views/transaction/TransactionList.vue'),
+        meta: { requiresAuth: true, title: '交易记录' }
+      },
+      {
+        path: 'transactions/add',
+        name: 'AddTransaction',
+        component: () => import('@/views/transaction/AddTransaction.vue'),
+        meta: { requiresAuth: true, title: '添加交易' }
+      },
+      {
+        path: 'transactions/:id/edit',
+        name: 'EditTransaction',
+        component: () => import('@/views/transaction/AddTransaction.vue'),
+        meta: { requiresAuth: true, title: '编辑交易' }
+      },
+      {
+        path: 'statistics',
+        name: 'Statistics',
+        component: () => import('@/views/statistics/Overview.vue'),
+        meta: { requiresAuth: true, title: '统计分析' }
+      },
+      {
+        path: 'wechat/import',
+        name: 'WechatImport',
+        component: () => import('@/views/import/WechatImport.vue'),
+        meta: { requiresAuth: true, title: '微信账单导入' }
+      },
+      {
+        path: 'budgets',
+        name: 'Budgets',
+        component: () => import('@/views/budget/BudgetList.vue'),
+        meta: { requiresAuth: true, title: '预算管理' }
+      },
+      {
+        path: 'budget',
+        redirect: '/budgets'
+      },
+      {
+        path: 'reminders',
+        name: 'Reminders',
+        component: () => import('@/views/reminder/ReminderManagement.vue'),
+        meta: { requiresAuth: true, title: '提醒管理' }
+      },
+      {
+        path: 'reminder',
+        redirect: '/reminders'
+      },
+      {
+        path: 'accounts',
+        name: 'Accounts',
+        component: () => import('@/views/account/AccountList.vue'),
+        meta: { requiresAuth: true, title: '账户管理' }
+      },
+      {
+        path: 'account',
+        redirect: '/accounts'
+      },
+      {
+        path: 'settings',
+        name: 'Settings',
+        component: () => import('@/views/settings/Settings.vue'),
+        meta: { requiresAuth: true, title: '系统设置' }
+      },
+      {
+        path: 'profile',
+        name: 'Profile',
+        component: () => import('@/views/settings/Profile.vue'),
+        meta: { requiresAuth: true, title: '个人资料' }
+      }
+    ]
   },
   {
     path: '/:pathMatch(.*)*',

@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from app.config.database import get_db
 from app.schemas.user import (
-    UserCreate, UserLogin, UserResponse, Token,
+    UserCreate, UserLogin,
     PasswordResetRequest, PasswordReset
 )
 from app.services.auth_service import AuthService
@@ -83,7 +83,7 @@ async def reset_password(
     """重置密码"""
     try:
         auth_service = AuthService(db)
-        result = await auth_service.reset_password(reset_data.token, reset_data.new_password)
+        await auth_service.reset_password(reset_data.token, reset_data.new_password)
         return success_response(message="密码重置成功")
     except Exception as e:
         if isinstance(e, BusinessException):
