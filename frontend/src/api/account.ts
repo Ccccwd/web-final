@@ -8,7 +8,7 @@ export function getAccounts(params?: {
   type?: string
   is_enabled?: boolean
 }) {
-  return request.get<{ data: { accounts: Account[]; total: number } }>('/accounts', { params })
+  return request.get<{ accounts: Account[]; total: number }>('/accounts', { params })
 }
 
 /**
@@ -97,7 +97,7 @@ export function getBalanceHistory(accountId: number, params?: {
   offset?: number
   change_type?: string
 }) {
-  return request.get<{ data: any[] }>(`/accounts/${accountId}/balance-history`, { params })
+  return request.get<any[]>(`/accounts/${accountId}/balance-history`, { params })
 }
 
 /**

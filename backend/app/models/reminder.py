@@ -15,7 +15,7 @@ class Reminder(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True, comment="提醒ID")
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, comment="用户ID")
-    type = Column(Enum(ReminderType), nullable=False, comment="提醒类型: 每日记账/预算预警/循环提醒/分析报告")
+    type = Column(Enum(ReminderType, native_enum=False, values_callable=lambda x: [e.value for e in x]), nullable=False, comment="提醒类型: 每日记账/预算预警/循环提醒/分析报告")
     title = Column(String(100), comment="标题")
     content = Column(Text, comment="内容")
     remind_time = Column(Time, comment="提醒时间")

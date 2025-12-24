@@ -24,8 +24,8 @@ export const useAccountStore = defineStore('account', () => {
       loading.value = true
       error.value = null
       const response = await getAccounts()
-      accounts.value = response.data?.data?.accounts || []
-      return response.data?.data?.accounts || []
+      accounts.value = response.data.accounts || []
+      return response.data.accounts || []
     } catch (err: any) {
       error.value = err.message || '获取账户失败'
       throw err

@@ -19,7 +19,7 @@ class ImportLog(Base):
     source = Column(String(50), nullable=False, comment="数据来源(wechat/alipay/manual)")
     file_name = Column(String(200), comment="导入文件名")
     file_size = Column(Integer, comment="文件大小(字节)")
-    status = Column(Enum(ImportStatus), default=ImportStatus.PENDING, comment="导入状态")
+    status = Column(Enum(ImportStatus, native_enum=False, values_callable=lambda x: [e.value for e in x]), default=ImportStatus.PENDING, comment="导入状态")
 
     # 统计信息
     total_records = Column(Integer, default=0, comment="总记录数")

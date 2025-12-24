@@ -110,7 +110,6 @@ class AccountService:
 
         return query.order_by(
             Account.is_default.desc(),
-            Account.sort_order.asc(),
             Account.name.asc()
         ).all()
 

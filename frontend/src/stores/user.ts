@@ -56,8 +56,8 @@ export const useUserStore = defineStore('user', () => {
   const fetchUserInfo = async () => {
     try {
       const response = await getUserInfo()
-      user.value = response.data.data
-      return response.data.data
+      user.value = response.data
+      return response.data
     } catch (error) {
       console.error('获取用户信息失败:', error)
       throw error

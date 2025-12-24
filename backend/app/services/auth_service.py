@@ -212,7 +212,7 @@ class AuthService:
 
             return True
 
-        except Exception as e:
+        except Exception:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="重置密码失败"

@@ -14,7 +14,8 @@ from app.core.exceptions import (
 app = FastAPI(
     title="个人财务记账系统 API",
     description="一个面向大学生和年轻群体的轻量级个人财务管理系统",
-    version="1.0.0"
+    version="1.0.0",
+    redirect_slashes=False  # 禁用自动斜杠重定向,避免CORS问题
 )
 
 # CORS中间件配置

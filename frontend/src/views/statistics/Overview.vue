@@ -352,8 +352,8 @@ const exportData = async () => {
 
     // 下载文件
     const link = document.createElement('a')
-    link.href = `/api/download/${response.data.data.filename}`
-    link.download = response.data.data.filename
+    link.href = `/api/download/${response.data.filename}`
+    link.download = response.data.filename
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)

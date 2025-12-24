@@ -351,8 +351,8 @@ const loadTransactions = async () => {
     }
 
     const response = await transactionApi.getTransactions(params)
-    transactions.value = response.data.data || []
-    pagination.total = response.data.pagination.total || 0
+    transactions.value = response.data.transactions || []
+    pagination.total = response.data.total || 0
 
   } catch (error) {
     console.error('加载交易记录失败:', error)
@@ -369,7 +369,7 @@ const loadSummary = async () => {
     if (filters.end_date) params.end_date = filters.end_date
 
     const response = await transactionApi.getStatistics(params)
-    const data = response.data.data
+    const data = response.data
     summary.value = {
       total_income: formatNumber(data.total_income || 0),
       total_expense: formatNumber(data.total_expense || 0),
@@ -385,7 +385,7 @@ const loadSummary = async () => {
 const loadCategories = async () => {
   try {
     const response = await categoryApi.getCategories()
-    categories.value = response.data.data || []
+    categories.value = response.data.categories || []
   } catch (error) {
     console.error('加载分类失败:', error)
   }
@@ -394,7 +394,7 @@ const loadCategories = async () => {
 const loadAccounts = async () => {
   try {
     const response = await accountApi.getAccounts()
-    accounts.value = response.data.data.accounts || []
+    accounts.value = response.data.accounts || []
   } catch (error) {
     console.error('加载账户失败:', error)
   }

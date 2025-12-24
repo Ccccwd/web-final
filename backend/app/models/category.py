@@ -13,7 +13,7 @@ class Category(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True, comment="分类ID")
     name = Column(String(50), nullable=False, comment="分类名称")
-    type = Column(Enum(CategoryType), nullable=False, comment="分类类型: 收入/支出")
+    type = Column(Enum(CategoryType, native_enum=False, values_callable=lambda x: [e.value for e in x]), nullable=False, comment="分类类型: 收入/支出")
     icon = Column(String(50), comment="图标(emoji)")
     color = Column(String(20), comment="颜色")
     parent_id = Column(Integer, ForeignKey('categories.id'), comment="父分类ID(支持二级分类)")

@@ -25,7 +25,7 @@ export function getTrend(params: {
   start_date?: string
   end_date?: string
 }) {
-  return request.get<{ data: TrendData[] }>('/statistics/trend', { params })
+  return request.get<TrendData[]>('/statistics/trend', { params })
 }
 
 /**

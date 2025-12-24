@@ -19,7 +19,7 @@ class Account(Base):
     id = Column(Integer, primary_key=True, autoincrement=True, comment="账户ID")
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, comment="用户ID")
     name = Column(String(50), nullable=False, comment="账户名称")
-    type = Column(Enum(AccountType), nullable=False, comment="账户类型")
+    type = Column(Enum(AccountType, native_enum=False, values_callable=lambda x: [e.value for e in x]), nullable=False, comment="账户类型")
     balance = Column(Numeric(10, 2), default=0, comment="当前余额")
     initial_balance = Column(Numeric(10, 2), default=0, comment="初始余额")
     icon = Column(String(50), comment="图标")

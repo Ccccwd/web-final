@@ -21,8 +21,9 @@ def get_category_service(db: Session = Depends(get_db)) -> CategoryService:
     return CategoryService(db)
 
 @router.get("/", response_model=CategoryListResponse)
+@router.get("", response_model=CategoryListResponse)
 async def get_categories(
-    type: Optional[CategoryType] = Query(None, description="分类类型"),
+    type: Optional[str] = Query(None, description="分类类型"),
     include_system: bool = Query(True, description="是否包含系统分类"),
     parent_id: Optional[int] = Query(None, description="父分类ID"),
     current_user: User = Depends(get_current_active_user),
@@ -30,9 +31,14 @@ async def get_categories(
 ):
     """获取分类列表"""
     try:
+        # 处理分类类型（过滤空字符串）
+        category_type = None
+        if type and type.strip():
+            category_type = CategoryType(type)
+        
         categories = category_service.get_categories(
             user_id=current_user.id,
-            category_type=type,
+            category_type=category_type,
             include_system=include_system,
             parent_id=parent_id
         )
@@ -42,7 +48,7 @@ async def get_categories(
         for category in categories:
             category_dict = {
                 "id": category.id,
-                "user_id": category.user_id,
+                "user_id": None,  # 分类是系统级的,没有user_id
                 "name": category.name,
                 "type": category.type,
                 "icon": category.icon,
@@ -83,7 +89,7 @@ async def get_category_tree(
         for category in categories:
             category_dict = {
                 "id": category.id,
-                "user_id": category.user_id,
+                "user_id": None,  # 分类是系统级的,没有user_id
                 "name": category.name,
                 "type": category.type,
                 "icon": category.icon,
@@ -177,7 +183,7 @@ async def create_category(
 
         category_dict = {
             "id": category.id,
-            "user_id": category.user_id,
+            "user_id": None,  # 分类是系统级的,没有user_id
             "name": category.name,
             "type": category.type,
             "icon": category.icon,
@@ -213,7 +219,7 @@ async def update_category(
 
         category_dict = {
             "id": category.id,
-            "user_id": category.user_id,
+            "user_id": None,  # 分类是系统级的,没有user_id
             "name": category.name,
             "type": category.type,
             "icon": category.icon,
@@ -272,7 +278,7 @@ async def init_system_categories(
         for category in categories:
             category_dict = {
                 "id": category.id,
-                "user_id": category.user_id,
+                "user_id": None,  # 分类是系统级的,没有user_id
                 "name": category.name,
                 "type": category.type,
                 "icon": category.icon,

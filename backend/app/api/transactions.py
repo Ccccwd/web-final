@@ -22,17 +22,20 @@ def get_transaction_service(db: Session = Depends(get_db)) -> TransactionService
     return TransactionService(db)
 
 @router.get("/", response_model=TransactionListResponse)
+@router.get("", response_model=TransactionListResponse)
 async def get_transactions(
     page: int = Query(1, ge=1, description="页码"),
     page_size: int = Query(20, ge=1, le=100, description="每页数量"),
-    type: Optional[TransactionType] = Query(None, description="交易类型"),
+    type: Optional[str] = Query(None, description="交易类型"),
     category_id: Optional[int] = Query(None, ge=1, description="分类ID"),
     account_id: Optional[int] = Query(None, ge=1, description="账户ID"),
-    start_date: Optional[datetime] = Query(None, description="开始日期"),
-    end_date: Optional[datetime] = Query(None, description="结束日期"),
+    start_date: Optional[str] = Query(None, description="开始日期"),
+    end_date: Optional[str] = Query(None, description="结束日期"),
     keyword: Optional[str] = Query(None, description="关键词搜索"),
     min_amount: Optional[float] = Query(None, ge=0, description="最小金额"),
     max_amount: Optional[float] = Query(None, ge=0, description="最大金额"),
+    sort_by: Optional[str] = Query(None, description="排序字段"),
+    sort_order: Optional[str] = Query(None, description="排序方向"),
     current_user: User = Depends(get_current_active_user),
     transaction_service: TransactionService = Depends(get_transaction_service)
 ):
@@ -47,19 +50,19 @@ async def get_transactions(
     - 金额范围筛选
     """
     try:
-        # 构建筛选条件
+        # 构建筛选条件（过滤空字符串）
         filter_dict = {}
-        if type:
-            filter_dict['type'] = type
+        if type and type.strip():
+            filter_dict['type'] = TransactionType(type)
         if category_id:
             filter_dict['category_id'] = category_id
         if account_id:
             filter_dict['account_id'] = account_id
-        if start_date:
-            filter_dict['start_date'] = start_date
-        if end_date:
-            filter_dict['end_date'] = end_date
-        if keyword:
+        if start_date and start_date.strip():
+            filter_dict['start_date'] = datetime.fromisoformat(start_date.replace('Z', '+00:00'))
+        if end_date and end_date.strip():
+            filter_dict['end_date'] = datetime.fromisoformat(end_date.replace('Z', '+00:00'))
+        if keyword and keyword.strip():
             filter_dict['keyword'] = keyword
         if min_amount:
             filter_dict['min_amount'] = min_amount
@@ -122,19 +125,29 @@ async def get_transactions(
     except Exception as e:
         return error_response(500, f"获取交易记录失败: {str(e)}")
 
+@router.get("/statistics")
 @router.get("/summary", response_model=TransactionSummary)
 async def get_transaction_summary(
-    start_date: Optional[datetime] = Query(None, description="开始日期"),
-    end_date: Optional[datetime] = Query(None, description="结束日期"),
+    start_date: Optional[str] = Query(None, description="开始日期"),
+    end_date: Optional[str] = Query(None, description="结束日期"),
+    type: Optional[str] = Query(None, description="交易类型"),
     current_user: User = Depends(get_current_active_user),
     transaction_service: TransactionService = Depends(get_transaction_service)
 ):
     """获取交易统计摘要"""
     try:
+        # 处理日期字符串（过滤空字符串）
+        start_dt = None
+        end_dt = None
+        if start_date and start_date.strip():
+            start_dt = datetime.fromisoformat(start_date.replace('Z', '+00:00'))
+        if end_date and end_date.strip():
+            end_dt = datetime.fromisoformat(end_date.replace('Z', '+00:00'))
+        
         summary = transaction_service.get_transaction_summary(
             user_id=current_user.id,
-            start_date=start_date,
-            end_date=end_date
+            start_date=start_dt,
+            end_date=end_dt
         )
 
         return TransactionSummary(

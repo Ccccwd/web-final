@@ -15,8 +15,8 @@ export const useCategoryStore = defineStore('category', () => {
       loading.value = true
       error.value = null
       const response = await getCategories()
-      categories.value = response.data.data
-      return response.data.data
+      categories.value = response.data.categories
+      return response.data.categories
     } catch (err: any) {
       error.value = err.message || '获取分类失败'
       throw err

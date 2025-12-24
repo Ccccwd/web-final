@@ -21,17 +21,23 @@ def get_account_service(db: Session = Depends(get_db)) -> AccountService:
     return AccountService(db)
 
 @router.get("/", response_model=AccountListResponse)
+@router.get("", response_model=AccountListResponse)
 async def get_accounts(
-    type: Optional[AccountType] = Query(None, description="账户类型"),
+    type: Optional[str] = Query(None, description="账户类型"),
     is_enabled: Optional[bool] = Query(None, description="是否启用"),
     current_user: User = Depends(get_current_active_user),
     account_service: AccountService = Depends(get_account_service)
 ):
     """获取账户列表"""
     try:
+        # 处理账户类型（过滤空字符串）
+        account_type = None
+        if type and type.strip():
+            account_type = AccountType(type)
+        
         accounts = account_service.get_accounts(
             user_id=current_user.id,
-            account_type=type,
+            account_type=account_type,
             is_enabled=is_enabled
         )
 

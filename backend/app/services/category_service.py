@@ -98,13 +98,11 @@ class CategoryService:
         """
         query = self.db.query(Category)
 
-        # 用户分类或系统分类
-        if include_system:
-            query = query.filter(
-                or_(Category.user_id == user_id, Category.is_system == True)
-            )
-        else:
-            query = query.filter(Category.user_id == user_id)
+        # 注意: 分类是系统级的,没有user_id字段
+        # 如果不包含系统分类,则只返回用户自定义分类(未来功能)
+        # 目前所有分类都是系统分类
+        if not include_system:
+            query = query.filter(Category.is_system == False)
 
         if category_type:
             query = query.filter(Category.type == category_type)

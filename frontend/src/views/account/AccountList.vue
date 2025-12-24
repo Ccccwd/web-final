@@ -436,11 +436,11 @@ const loadAccounts = async () => {
     if (filters.is_enabled !== null) params.is_enabled = filters.is_enabled
 
     const response = await accountApi.getAccounts(params)
-    accounts.value = response.data.data.accounts
+    accounts.value = response.data.accounts
 
     // 加载账户统计
     const summaryResponse = await accountApi.getAccountSummary()
-    accountSummary.value = summaryResponse.data.data
+    accountSummary.value = summaryResponse.data
   } catch (error) {
     ElMessage.error('加载账户列表失败')
   } finally {
@@ -590,7 +590,7 @@ const viewAccountDetail = async (account) => {
   try {
     // 加载余额历史
     const historyResponse = await accountApi.getBalanceHistory(account.id)
-    balanceHistory.value = historyResponse.data.data
+    balanceHistory.value = historyResponse.data
 
     // 加载最近交易记录（这里需要调用交易API）
     // recentTransactions.value = await transactionApi.getRecentTransactions(account.id)

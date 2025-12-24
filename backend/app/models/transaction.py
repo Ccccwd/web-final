@@ -19,7 +19,7 @@ class Transaction(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True, comment="交易ID")
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, comment="用户ID")
-    type = Column(Enum(TransactionType), nullable=False, comment="交易类型: 收入/支出/转账")
+    type = Column(Enum(TransactionType, native_enum=False, values_callable=lambda x: [e.value for e in x]), nullable=False, comment="交易类型: 收入/支出/转账")
     amount = Column(Numeric(10, 2), nullable=False, comment="金额")
     category_id = Column(Integer, ForeignKey("categories.id"), nullable=False, comment="分类ID")
     account_id = Column(Integer, ForeignKey("accounts.id"), nullable=False, comment="账户ID")
@@ -31,7 +31,7 @@ class Transaction(Base):
     location = Column(String(100), comment="地点")
 
     # 微信导入相关字段
-    source = Column(Enum(TransactionSource), default=TransactionSource.MANUAL, comment="数据来源")
+    source = Column(Enum(TransactionSource, native_enum=False, values_callable=lambda x: [e.value for e in x]), default=TransactionSource.MANUAL, comment="数据来源")
     wechat_transaction_id = Column(String(100), unique=True, comment="微信交易ID(防止重复导入)")
     original_category = Column(String(100), comment="原始分类(如微信分类)")
     merchant_name = Column(String(200), comment="商户名称")

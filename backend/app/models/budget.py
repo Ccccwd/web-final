@@ -15,7 +15,7 @@ class Budget(Base):
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, comment="用户ID")
     category_id = Column(Integer, ForeignKey("categories.id", ondelete="CASCADE"), comment="分类ID(NULL表示总预算)")
     amount = Column(Numeric(10, 2), nullable=False, comment="预算金额")
-    period_type = Column(Enum(PeriodType), nullable=False, comment="周期类型: 月度/年度")
+    period_type = Column(Enum(PeriodType, native_enum=False, values_callable=lambda x: [e.value for e in x]), nullable=False, comment="周期类型: 月度/年度")
     year = Column(Integer, nullable=False, comment="年份")
     month = Column(Integer, comment="月份(月度预算时使用)")
     alert_threshold = Column(Integer, default=80, comment="预警阈值(百分比)")

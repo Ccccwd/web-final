@@ -346,11 +346,11 @@ const loadReminders = async () => {
     if (filters.is_enabled !== null) params.is_enabled = filters.is_enabled
 
     const response = await reminderApi.getReminders(params)
-    reminders.value = response.data.data.reminders
+    reminders.value = response.data.reminders
 
     // 加载提醒统计
     const statsResponse = await reminderApi.getReminderStatistics()
-    reminderStats.value = statsResponse.data.data || reminderStats.value
+    reminderStats.value = statsResponse.data || reminderStats.value
   } catch (error) {
     ElMessage.error('加载提醒列表失败')
   } finally {
@@ -361,7 +361,7 @@ const loadReminders = async () => {
 const loadCategories = async () => {
   try {
     const response = await categoryApi.getCategories()
-    expenseCategories.value = response.data.data.filter((c: any) => c.type === 'expense')
+    expenseCategories.value = response.data.categories.filter((c: any) => c.type === 'expense')
   } catch (error) {
     console.error('加载分类列表失败:', error)
   }
@@ -514,10 +514,10 @@ const deleteReminder = async (reminder) => {
 const checkDailyReminder = async () => {
   try {
     const response = await reminderApi.checkDailyReminder()
-    if (response.data.data.reminder_created) {
+    if (response.data.reminder_created) {
       ElMessage.success('已为您创建每日记账提醒')
     } else {
-      ElMessage.info(response.data.data.message || '暂无需创建提醒')
+      ElMessage.info(response.data.message || '暂无需创建提醒')
     }
     loadReminders()
   } catch (error) {
@@ -528,7 +528,7 @@ const checkDailyReminder = async () => {
 const createFromTemplate = async (templateType) => {
   try {
     const response = await reminderApi.getTemplate(templateType)
-    const template = response.data.data
+    const template = response.data
 
     Object.assign(reminderForm, {
       type: template.type,

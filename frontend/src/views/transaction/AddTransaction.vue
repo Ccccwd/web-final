@@ -283,11 +283,11 @@ const loadData = async () => {
 
     // 加载分类
     const categoriesResponse = await categoryApi.getCategories()
-    categories.value = categoriesResponse.data.data || []
+    categories.value = categoriesResponse.data.categories || []
 
     // 加载账户
     const accountsResponse = await accountApi.getAccounts()
-    accounts.value = accountsResponse.data.data.accounts || []
+    accounts.value = accountsResponse.data.accounts || []
 
     // 设置默认账户
     if (accounts.value.length > 0) {

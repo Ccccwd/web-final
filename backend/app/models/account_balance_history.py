@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, Enum, Numeric, ForeignKey, Text
+from sqlalchemy import Column, Integer, String, DateTime, Enum, Numeric, ForeignKey
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.config.database import Base
@@ -21,7 +21,7 @@ class AccountBalanceHistory(Base):
     transaction_id = Column(Integer, ForeignKey("transactions.id", ondelete="SET NULL"), comment="关联交易ID")
 
     # 余额变化信息
-    change_type = Column(Enum(BalanceChangeType), nullable=False, comment="变化类型")
+    change_type = Column(Enum(BalanceChangeType, native_enum=False, values_callable=lambda x: [e.value for e in x]), nullable=False, comment="变化类型")
     amount_before = Column(Numeric(10, 2), nullable=False, comment="变化前余额")
     amount_after = Column(Numeric(10, 2), nullable=False, comment="变化后余额")
     change_amount = Column(Numeric(10, 2), nullable=False, comment="变化金额")

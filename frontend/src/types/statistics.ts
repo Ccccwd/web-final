@@ -154,9 +154,7 @@ export interface ExportParams {
 }
 
 export interface ExportResponse {
-  data: {
-    message: string
-    file_path: string
-    filename: string
-  }
+  message: string
+  file_path: string
+  filename: string
 }

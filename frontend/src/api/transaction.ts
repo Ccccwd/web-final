@@ -17,13 +17,11 @@ export function getTransactions(params?: {
   sort_order?: 'asc' | 'desc'
 }) {
   return request.get<{
-    data: Transaction[]
-    pagination: {
-      page: number
-      page_size: number
-      total: number
-      total_pages: number
-    }
+    transactions: Transaction[]
+    total: number
+    page: number
+    page_size: number
+    total_pages: number
   }>('/transactions', { params })
 }
 
@@ -90,11 +88,9 @@ export function getStatistics(params?: {
   type?: string
 }) {
   return request.get<{
-    data: {
-      total_income: number
-      total_expense: number
-      net_income: number
-      transaction_count: number
-    }
+    total_income: number
+    total_expense: number
+    net_income: number
+    transaction_count: number
   }>('/transactions/statistics', { params })
 }

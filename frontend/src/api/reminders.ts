@@ -24,7 +24,7 @@ export function getReminders(params?: {
   type?: string
   is_enabled?: boolean
 }) {
-  return request.get<{ data: { reminders: Reminder[]; total: number } }>('/reminders', { params })
+  return request.get<{ reminders: Reminder[]; total: number }>('/reminders', { params })
 }
 
 /**
@@ -76,14 +76,19 @@ export function deleteReminder(reminderId: number) {
  * 获取提醒统计
  */
 export function getReminderStatistics() {
-  return request.get<{ data: any }>('/reminders/statistics/summary')
+  return request.get<{
+    total_reminders: number
+    enabled_reminders: number
+    disabled_reminders: number
+    type_stats: Record<string, number>
+  }>('/reminders/statistics/summary')
 }
 
 /**
  * 检查每日提醒
  */
 export function checkDailyReminder() {
-  return request.post<{ data: any }>('/reminders/check-daily-reminder')
+  return request.post<{ reminder_created: boolean; message?: string }>('/reminders/check-daily-reminder')
 }
 
 /**
@@ -98,7 +103,14 @@ export function processDueReminders() {
  */
 export function getTemplate(templateType: 'daily' | 'budget' | 'monthly-report') {
   const endpoint = templateType === 'monthly-report' ? '/reminders/templates/monthly-report' : `/reminders/templates/${templateType}-reminder`
-  return request.get<{ data: any }>(endpoint)
+  return request.get<{
+    type: string
+    title: string
+    content: string
+    remind_time?: string
+    remind_day?: number
+    is_enabled: boolean
+  }>(endpoint)
 }
 
 // 导出为reminderApi（与组件中使用的名称一致）

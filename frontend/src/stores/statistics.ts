@@ -52,8 +52,8 @@ export const useStatisticsStore = defineStore('statistics', () => {
       loading.value = true
       error.value = null
       const response = await getTrend(params)
-      trendData.value = response.data.data
-      return response.data.data
+      trendData.value = response.data
+      return response.data
     } catch (err: any) {
       error.value = err.message || '获取趋势数据失败'
       throw err
