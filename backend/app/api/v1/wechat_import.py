@@ -19,7 +19,7 @@ from app.services.import_error_analysis_service import ImportErrorAnalysisServic
 from app.services.balance_verification_service import BalanceVerificationService
 from app.core.dependencies import get_current_user
 from app.core.exceptions import NotFoundError, ValidationError
-from app.wechat_parser import parse_wechat_csv
+from app.wechat_parser import parse_wechat_bill, get_file_summary
 
 router = APIRouter(prefix="/wechat", tags=["wechat-import"])
 
@@ -31,15 +31,14 @@ async def upload_wechat_bill(
     db: Session = Depends(get_db)
 ):
     """
-    上传微信账单文件
+    上传微信账单文件（支持CSV和XLSX格式）
     """
-    if not file.filename.endswith('.csv'):
-        raise HTTPException(status_code=400, detail="只支持CSV格式的微信账单文件")
+    if not (file.filename.endswith('.csv') or file.filename.endswith('.xlsx')):
+        raise HTTPException(status_code=400, detail="只支持CSV或XLSX格式的微信账单文件")
 
     try:
         # 读取文件内容
         content = await file.read()
-        file_stream = io.StringIO(content.decode('utf-8'))
 
         # 创建导入日志
         import_log = ImportLog(
@@ -59,6 +58,7 @@ async def upload_wechat_bill(
             import_log.id,
             current_user.id,
             content,
+            file.filename,
             db
         )
 
@@ -71,7 +71,7 @@ async def upload_wechat_bill(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"文件上传失败: {str(e)}")
 
-@router.post("/preview", response_model=ImportPreview)
+@router.post("/preview", response_model=Dict)
 async def preview_wechat_bill(
     file: UploadFile = File(...),
     limit: int = 10,
@@ -79,17 +79,16 @@ async def preview_wechat_bill(
     db: Session = Depends(get_db)
 ):
     """
-    预览微信账单数据
+    预览微信账单数据（支持CSV和XLSX格式）
     """
-    if not file.filename.endswith('.csv'):
-        raise HTTPException(status_code=400, detail="只支持CSV格式的微信账单文件")
+    if not (file.filename.endswith('.csv') or file.filename.endswith('.xlsx')):
+        raise HTTPException(status_code=400, detail="只支持CSV或XLSX格式的微信账单文件")
 
     try:
         content = await file.read()
-        file_stream = io.StringIO(content.decode('utf-8'))
 
         # 解析账单数据
-        transactions = parse_wechat_csv(content)
+        transactions = parse_wechat_bill(content, file.filename)
 
         # 限制预览数量
         preview_transactions = transactions[:limit]
@@ -100,31 +99,50 @@ async def preview_wechat_bill(
         total_income = sum(t['amount'] for t in transactions if t['transaction_type'] == TransactionType.INCOME)
         total_expense = sum(t['amount'] for t in transactions if t['transaction_type'] == TransactionType.EXPENSE)
 
-        # 获取智能分类建议
-        smart_service = SmartCategorizationService(db)
-        enriched_transactions = []
+        # 获取文件摘要
+        summary = get_file_summary(content, file.filename)
 
-        for transaction in preview_transactions:
-            if transaction.get('merchant_name'):
-                suggestion = smart_service.suggest_category(
-                    current_user.id,
-                    transaction['merchant_name'],
-                    transaction['amount'],
-                    transaction['transaction_type']
-                )
-                transaction['category_suggestion'] = suggestion
-            enriched_transactions.append(transaction)
+        # 获取智能分类建议（可选，失败不影响预览）
+        try:
+            smart_service = SmartCategorizationService(db)
+            for transaction in preview_transactions:
+                if transaction.get('merchant_name'):
+                    try:
+                        suggestion = smart_service.suggest_category(
+                            current_user.id,
+                            transaction['merchant_name'],
+                            transaction['amount'],
+                            transaction['transaction_type']
+                        )
+                        transaction['category_suggestion'] = suggestion
+                    except Exception as e:
+                        # 智能分类失败不影响预览
+                        print(f"智能分类失败: {str(e)}")
+                        transaction['category_suggestion'] = None
+        except Exception as e:
+            # 智能分类服务失败不影响预览
+            print(f"智能分类服务初始化失败: {str(e)}")
 
-        return ImportPreview(
-            total_records=len(transactions),
-            income_records=income_count,
-            expense_records=expense_count,
-            total_amount=total_income + total_expense,
-            preview_records=preview_transactions,
-            suggested_categories=[t['category_suggestion'] for t in enriched_transactions if t.get('category_suggestion')]
-        )
+        return {
+            "valid": True,
+            "preview": {
+                "total_records": len(transactions),
+                "preview_data": preview_transactions,
+                "detected_format": "微信账单XLSX" if file.filename.endswith('.xlsx') else "微信账单CSV",
+                "potential_duplicates": 0
+            },
+            "summary": summary,
+            "income_count": income_count,
+            "expense_count": expense_count,
+            "total_income": total_income,
+            "total_expense": total_expense
+        }
 
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"预览失败: {str(e)}")
 
 @router.get("/import/{import_id}", response_model=ImportLogResponse)
@@ -450,6 +468,7 @@ async def process_wechat_import(
     import_log_id: int,
     user_id: int,
     content: bytes,
+    filename: str,
     db: Session
 ):
     """
@@ -457,7 +476,7 @@ async def process_wechat_import(
     """
     try:
         # 解析账单数据
-        transactions = parse_wechat_csv(content)
+        transactions = parse_wechat_bill(content, filename)
 
         import_log = db.query(ImportLog).filter(
             ImportLog.id == import_log_id

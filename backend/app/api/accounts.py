@@ -137,6 +137,7 @@ async def get_account(
         return error_response(500, f"获取账户详情失败: {str(e)}")
 
 @router.post("/", response_model=AccountResponse)
+@router.post("", response_model=AccountResponse)
 async def create_account(
     account_data: AccountCreate,
     current_user: User = Depends(get_current_active_user),

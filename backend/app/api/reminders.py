@@ -21,6 +21,7 @@ def get_reminder_service(db: Session = Depends(get_db)) -> ReminderService:
     return ReminderService(db)
 
 @router.get("/", response_model=ReminderListResponse)
+@router.get("", response_model=ReminderListResponse)  # 同时支持不带斜杠的路径
 async def get_reminders(
     reminder_type: Optional[ReminderType] = Query(None, description="提醒类型"),
     is_enabled: Optional[bool] = Query(None, description="是否启用"),

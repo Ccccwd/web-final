@@ -2,6 +2,7 @@ import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse, AxiosE
 import { ElMessage, ElLoading } from 'element-plus'
 import { APIResponse } from '@/types'
 import { useUserStore } from '@/stores/user'
+import router from '@/router'
 
 // 声明接口用于扩展axios配置
 interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
@@ -12,6 +13,7 @@ interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
 
 let loadingInstance: any = null
 let loadingCount = 0
+let isRefreshing = false // 防止多个401请求同时触发跳转
 
 // 显示加载动画
 function showLoading() {
@@ -80,17 +82,42 @@ request.interceptors.response.use(
 
     const { data } = response
 
-    // 检查业务状态码
-    if (data.code === 200 || data.success) {
-      return Promise.resolve(data)
-    } else {
-      // 业务错误
-      const errorMessage = data.message || '请求失败'
-      if (config.showError !== false) {
-        ElMessage.error(errorMessage)
+    // 检查响应格式
+    // 后端有些API返回标准格式 {code, message, data, success}
+    // 有些API直接返回数据 {transactions: [...], total: ...}
+    if (data && typeof data === 'object') {
+      // 如果有 code 字段，说明是标准API响应
+      if ('code' in data) {
+        if (data.code === 200 || data.success) {
+          // 成功响应，返回完整数据
+          return Promise.resolve(data)
+        } else {
+          // 业务错误
+          const errorMessage = data.message || '请求失败'
+          if (config.showError !== false) {
+            ElMessage.error(errorMessage)
+          }
+          return Promise.reject(new Error(errorMessage))
+        }
+      } else {
+        // 没有 code 字段，说明是直接数据响应
+        // 包装成标准格式
+        return Promise.resolve({
+          code: 200,
+          message: 'success',
+          data: data,
+          success: true
+        })
       }
-      return Promise.reject(new Error(errorMessage))
     }
+
+    // 其他情况，直接返回数据
+    return Promise.resolve({
+      code: 200,
+      message: 'success',
+      data: data,
+      success: true
+    })
   },
   (error: AxiosError) => {
     // 隐藏加载动画
@@ -106,15 +133,48 @@ request.interceptors.response.use(
       switch (status) {
         case 401:
           // 未授权，跳转到登录页
-          const userStore = useUserStore()
-          userStore.logoutAction()
-          ElMessage.error('登录已过期，请重新登录')
-          // 可以在这里使用路由跳转到登录页
-          // router.push('/login')
+          if (!isRefreshing) {
+            isRefreshing = true
+            const userStore = useUserStore()
+            userStore.logoutAction()
+
+            // 延迟一点，确保所有401请求都被处理
+            setTimeout(() => {
+              isRefreshing = false
+              if (router.currentRoute.value.path !== '/auth/login') {
+                ElMessage.error('登录已过期，请重新登录')
+                router.push({
+                  path: '/auth/login',
+                  query: { redirect: router.currentRoute.value.fullPath }
+                })
+              }
+            }, 100)
+          }
           break
 
         case 403:
-          ElMessage.error('没有权限访问')
+          // 可能是token过期或未认证
+          const errorMessage403 = (data as any)?.message || '没有权限访问'
+          if (errorMessage403.includes('Not authenticated') || errorMessage403.includes('未认证')) {
+            if (!isRefreshing) {
+              isRefreshing = true
+              const userStore = useUserStore()
+              userStore.logoutAction()
+
+              setTimeout(() => {
+                isRefreshing = false
+                if (router.currentRoute.value.path !== '/auth/login') {
+                  ElMessage.error('请先登录')
+                  router.push({
+                    path: '/auth/login',
+                    query: { redirect: router.currentRoute.value.fullPath }
+                  })
+                }
+              }, 100)
+            }
+          } else {
+            ElMessage.error(errorMessage403)
+          }
           break
 
         case 404:

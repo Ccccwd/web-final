@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, Enum, JSON, ForeignKey, Text
+from sqlalchemy import Column, Integer, BigInteger, String, DateTime, Enum, JSON, ForeignKey, Text
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.config.database import Base
@@ -15,7 +15,7 @@ class ImportLog(Base):
     __tablename__ = "import_logs"
 
     id = Column(Integer, primary_key=True, autoincrement=True, comment="导入日志ID")
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, comment="用户ID")
+    user_id = Column(BigInteger, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, comment="用户ID")
     source = Column(String(50), nullable=False, comment="数据来源(wechat/alipay/manual)")
     file_name = Column(String(200), comment="导入文件名")
     file_size = Column(Integer, comment="文件大小(字节)")

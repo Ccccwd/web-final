@@ -14,6 +14,7 @@ from app.core.responses import success_response, error_response
 router = APIRouter()
 
 @router.get("/")
+@router.get("")  # 同时支持不带斜杠的路径
 async def get_budgets(
     year: int = Query(..., description="年份"),
     month: Optional[int] = Query(None, description="月份"),

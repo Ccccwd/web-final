@@ -78,7 +78,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'budgets',
         name: 'Budgets',
-        component: () => import('@/views/budget/BudgetList.vue'),
+        component: () => import('@/views/budget/BudgetManagement.vue'),
         meta: { requiresAuth: true, title: '预算管理' }
       },
       {

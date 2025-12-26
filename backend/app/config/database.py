@@ -10,7 +10,10 @@ engine = create_engine(
     pool_pre_ping=True,  # 连接池预检查
     pool_recycle=3600,   # 连接回收时间（秒）
     max_overflow=20,     # 最大溢出连接数
-    pool_size=20         # 连接池大小
+    pool_size=20,        # 连接池大小
+    connect_args={
+        "charset": "utf8mb4"
+    }
 )
 
 # 创建会话工厂

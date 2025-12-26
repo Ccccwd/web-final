@@ -227,24 +227,13 @@
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="图标">
-              <el-input v-model="accountForm.icon" placeholder="图标名称">
-                <template #prefix>
-                  <el-icon>
-                    <component :is="accountForm.icon || 'Money'" />
-                  </el-icon>
-                </template>
-              </el-input>
+            <el-form-item label="颜色">
+              <el-color-picker v-model="accountForm.color" />
             </el-form-item>
           </el-col>
         </el-row>
 
         <el-row :gutter="20">
-          <el-col :span="12">
-            <el-form-item label="颜色">
-              <el-color-picker v-model="accountForm.color" />
-            </el-form-item>
-          </el-col>
           <el-col :span="12">
             <el-form-item label="默认账户">
               <el-switch v-model="accountForm.is_default" />

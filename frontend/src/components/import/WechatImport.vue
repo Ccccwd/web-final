@@ -24,17 +24,17 @@
             drag
             :auto-upload="false"
             :show-file-list="false"
-            accept=".csv"
+            accept=".csv,.xlsx"
             :before-upload="beforeUpload"
             @change="handleFileChange"
           >
             <el-icon class="el-icon--upload"><upload-filled /></el-icon>
             <div class="el-upload__text">
-              将微信账单CSV文件拖到此处，或<em>点击上传</em>
+              将微信账单文件（CSV或XLSX）拖到此处，或<em>点击上传</em>
             </div>
             <template #tip>
               <div class="el-upload__tip">
-                只能上传CSV文件，且文件大小不超过10MB
+                支持CSV和XLSX格式文件，且文件大小不超过10MB
               </div>
             </template>
           </el-upload>
@@ -87,11 +87,11 @@
             <div class="summary-grid">
               <div class="summary-item">
                 <div class="summary-label">总记录数</div>
-                <div class="summary-value">{{ previewData.preview.total_records }}</div>
+                <div class="summary-value">{{ previewData.preview?.total_records || 0 }}</div>
               </div>
               <div class="summary-item">
                 <div class="summary-label">潜在重复</div>
-                <div class="summary-value">{{ previewData.preview.potential_duplicates }}</div>
+                <div class="summary-value">{{ previewData.preview?.potential_duplicates || 0 }}</div>
               </div>
               <div class="summary-item" v-if="summaryData.income_count">
                 <div class="summary-label">收入笔数</div>
@@ -102,8 +102,8 @@
                 <div class="summary-value">{{ summaryData.expense_count }}</div>
               </div>
             </div>
-            <div v-if="summaryData.start_date && summaryData.end_date" class="date-range">
-              <strong>时间范围：</strong>{{ summaryData.start_date }} 至 {{ summaryData.end_date }}
+            <div v-if="summaryData.date_range?.start_date && summaryData.date_range?.end_date" class="date-range">
+              <strong>时间范围：</strong>{{ summaryData.date_range.start_date }} 至 {{ summaryData.date_range.end_date }}
             </div>
           </div>
 
@@ -111,7 +111,7 @@
           <div class="preview-table">
             <h4>📋 数据预览（前10条）</h4>
             <el-table
-              :data="previewData.preview.preview_data"
+              :data="previewData.preview?.preview_data || []"
               size="small"
               max-height="300"
               empty-text="无数据"
@@ -121,9 +121,13 @@
                   {{ formatDateTime(row.transaction_time) }}
                 </template>
               </el-table-column>
-              <el-table-column prop="transaction_type" label="交易类型" width="100" />
-              <el-table-column prop="counterparty" label="交易对方" width="120" />
-              <el-table-column prop="description" label="商品说明" min-width="150" />
+              <el-table-column prop="transaction_type" label="类型" width="80">
+                <template #default="{ row }">
+                  {{ getTransactionTypeText(row.transaction_type) }}
+                </template>
+              </el-table-column>
+              <el-table-column prop="merchant_name" label="交易对方" width="150" show-overflow-tooltip />
+              <el-table-column prop="description" label="说明" min-width="150" show-overflow-tooltip />
               <el-table-column prop="amount" label="金额" width="100" align="right">
                 <template #default="{ row }">
                   <span :class="getAmountClass(row.amount)">
@@ -320,7 +324,7 @@ import { ElMessage } from 'element-plus'
 import {
   UploadFilled, Document, Loading
 } from '@element-plus/icons-vue'
-import { accountApi } from '@/api'
+import { accountApi, wechatImportApi } from '@/api'
 
 const props = defineProps<{
   modelValue: boolean
@@ -399,10 +403,12 @@ const loadAccounts = async () => {
 
 const beforeUpload = (file: File) => {
   const isCSV = file.name.toLowerCase().endsWith('.csv')
+  const isXLSX = file.name.toLowerCase().endsWith('.xlsx')
+  const isValid = isCSV || isXLSX
   const isLt10M = file.size / 1024 / 1024 < 10
 
-  if (!isCSV) {
-    ElMessage.error('只能上传CSV格式文件!')
+  if (!isValid) {
+    ElMessage.error('只能上传CSV或XLSX格式文件!')
     return false
   }
   if (!isLt10M) {
@@ -415,10 +421,10 @@ const beforeUpload = (file: File) => {
 
 const handleFileChange = (file: any) => {
   selectedFile.value = file.raw
-  readAsText(file.raw)
+  readAsArrayBuffer(file.raw)
 }
 
-const readAsText = (file: File) => {
+const readAsArrayBuffer = (file: File) => {
   const reader = new FileReader()
   reader.onload = (e) => {
     fileContent.value = e.target?.result as string
@@ -426,7 +432,7 @@ const readAsText = (file: File) => {
   reader.onerror = () => {
     ElMessage.error('文件读取失败')
   }
-  reader.readAsText(file, 'UTF-8')
+  reader.readAsArrayBuffer(file)
 }
 
 const removeFile = () => {
@@ -455,6 +461,31 @@ const getAmountClass = (amount: number) => {
   return amount < 0 ? 'amount-negative' : 'amount-positive'
 }
 
+const getTransactionTypeText = (type: any) => {
+  // 处理枚举对象或字符串
+  const typeStr = String(type || '').toLowerCase()
+
+  // 处理后端返回的小写字符串格式
+  if (typeStr === 'expense' || typeStr === '支出') {
+    return '支出'
+  }
+
+  if (typeStr === 'income' || typeStr === '收入') {
+    return '收入'
+  }
+
+  // 处理枚举对象格式 "TransactionType.EXPENSE" (大写)
+  if (typeStr.includes('expense') || typeStr.includes('支出')) {
+    return '支出'
+  }
+
+  if (typeStr.includes('income') || typeStr.includes('收入')) {
+    return '收入'
+  }
+
+  return '未知'
+}
+
 const getExpectedImportCount = () => {
   if (!previewData.value) return 0
   const total = previewData.value.preview.total_records
@@ -478,36 +509,51 @@ const prevStep = () => {
 }
 
 const previewFile = async () => {
-  if (!fileContent.value) return
+  if (!selectedFile.value) return
 
   previewLoading.value = true
   previewError.value = ''
 
   try {
-    // 暂时禁用导入功能
-    previewError.value = '微信导入功能暂未实现，敬请期待'
+    const response = await wechatImportApi.preview(selectedFile.value) as any
 
-    // const response = await importAPI.previewWechatBill({
-    //   file: new File([fileContent.value], selectedFile.value!.name, { type: 'text/csv' })
-    // })
+    console.log('预览响应:', response)
 
-    // if (response.valid) {
-    //   previewData.value = response
-    //   summaryData.value = response.summary || {}
-    // } else {
-    //   previewError.value = response.error || '文件格式验证失败'
-    // }
+    // 响应被包装了，实际数据在data字段中
+    const data = response.data || response
+
+    if (data.valid || data.preview) {
+      previewData.value = data
+      summaryData.value = data.summary || {}
+      // 不要自动跳转，让用户停留在预览页面查看数据
+      // currentStep会在nextStep函数中自动递增
+    } else {
+      previewError.value = data.message || data.error || '文件格式验证失败'
+    }
 
   } catch (error: any) {
     console.error('预览失败:', error)
-    previewError.value = '预览功能暂未实现'
+    console.error('错误详情:', error.response)
+
+    // 详细的错误信息
+    if (error.response?.status === 403) {
+      previewError.value = '请先登录后再导入账单'
+    } else if (error.response?.status === 401) {
+      previewError.value = '登录已过期，请重新登录'
+    } else if (error.response?.data?.detail) {
+      previewError.value = error.response.data.detail
+    } else if (error.response?.data?.message) {
+      previewError.value = error.response.data.message
+    } else {
+      previewError.value = error.message || '预览失败，请检查文件格式'
+    }
   } finally {
     previewLoading.value = false
   }
 }
 
 const startImport = async () => {
-  if (!fileContent.value || !selectedFile.value) return
+  if (!selectedFile.value) return
 
   importing.value = true
   importProgress.percentage = 0
@@ -518,44 +564,31 @@ const startImport = async () => {
     importProgress.percentage = 30
     importProgress.message = '正在解析账单数据...'
 
-    // 模拟导入进度
-    const progressInterval = setInterval(() => {
-      if (importProgress.percentage < 90) {
-        importProgress.percentage += 10
-        importProgress.message = '正在导入交易记录...'
-      }
-    }, 500)
+    const response = await wechatImportApi.upload(selectedFile.value) as any
 
-    // 暂时禁用导入功能
-    // const response = await importAPI.importWechatBill({
-    //   file: new File([fileContent.value], selectedFile.value.name, { type: 'text/csv' }),
-    //   skip_duplicates: importSettings.skip_duplicates,
-    //   auto_categorize: importSettings.auto_categorize,
-    //   default_account_id: importSettings.default_account_id
-    // })
-
-    clearInterval(progressInterval)
+    // 响应被包装了，实际数据在data字段中
+    const data = response.data || response
 
     importProgress.percentage = 100
     importProgress.message = '导入完成！'
 
-    // 暂时禁用导入结果处理
     importResult.value = {
-      status: 'pending',
-      total_records: 0,
-      success_count: 0,
+      status: 'success',
+      total_records: data.preview?.total_records || previewData.value?.preview?.total_records || 0,
+      success_count: data.total_records || previewData.value?.total_records || 0,
       error_count: 0,
-      import_log_id: null
+      import_log_id: data.import_log_id
     }
 
     currentStep.value = 3
-    ElMessage.info('导入功能暂未实现，敬请期待')
+    ElMessage.success('账单导入成功！')
 
     emit('success')
 
   } catch (error: any) {
     console.error('导入失败:', error)
-    ElMessage.error(error.response?.data?.message || '导入失败')
+    const errorMessage = error.response?.data?.detail || error.response?.data?.message || error.message || '导入失败'
+    ElMessage.error(errorMessage)
     importProgress.status = 'exception'
   } finally {
     importing.value = false

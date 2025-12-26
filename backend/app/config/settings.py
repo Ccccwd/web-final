@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     debug: bool = True
 
     # 数据库配置
-    database_url: str = "mysql://root:root123456@localhost:3307/finance_system"
+    database_url: str = "mysql://root:root123456@localhost:3307/finance_system?charset=utf8mb4"
 
     # Redis配置
     redis_url: str = "redis://localhost:6380/0"

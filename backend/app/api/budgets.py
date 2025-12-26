@@ -5,6 +5,7 @@ from app.config.database import get_db
 router = APIRouter()
 
 @router.get("/")
+@router.get("")  # 同时支持不带斜杠的路径
 async def get_budgets(db: Session = Depends(get_db)):
     """获取预算列表"""
     return {"message": "预算列表"}
